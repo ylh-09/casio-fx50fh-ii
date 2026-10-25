@@ -1,0 +1,2848 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>fx-50FH II style — 教育用網頁計數機</title>
+  <style>
+:root {
+  --shell: #121314;
+  --shell-hi: #2a2c30;
+  --shell-edge: #0a0a0b;
+  --face: #c5c9d0;
+  --face-hi: #e8ebf0;
+  --face-mid: #d0d4db;
+  --face-lo: #a4a9b2;
+  --lcd-bg: #9aa88a;
+  --lcd-ink: #1a2214;
+  --lcd-dim: #6a7858;
+  --key-dark: #4a4e55;
+  --key-dark-hi: #5a5e66;
+  --key-num: #16171a;
+  --key-num-hi: #26282d;
+  --key-op: #2e3136;
+  --key-orange: #f07818;
+  --key-orange-hi: #ff9438;
+  --key-maroon: #6e2428;
+  --key-maroon-hi: #8a3238;
+  --key-replay: #b4b8c0;
+  --shift-col: #d4a010;
+  --alpha-col: #c02828;
+  --blue-lab: #1a5aa8;
+  --hkeaa: #c81818;
+  --super-fx: #2a6ab8;
+  --lab: #f4f4f4;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100%;
+  background: linear-gradient(165deg, #2a2c30 0%, #121416 100%);
+  font-family: "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  color: #eee;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px 28px;
+  gap: 14px;
+}
+
+/* Black plastic shell — thicker visible rim */
+.calc-shell {
+  width: min(380px, 100%);
+  background:
+    linear-gradient(180deg, #3a3c40 0%, var(--shell-hi) 8%, var(--shell) 55%, var(--shell-edge) 100%);
+  border-radius: 20px 20px 34px 34px;
+  padding: 12px 11px 16px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 -2px 4px rgba(0,0,0,.45) inset,
+    0 24px 52px rgba(0,0,0,.58),
+    0 3px 0 #000;
+  border: 1px solid #050505;
+}
+
+/* Brushed silver faceplate */
+.calc {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,.045) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,.03) 0 1px,
+      transparent 1px 4px
+    ),
+    linear-gradient(180deg, var(--face-hi) 0%, var(--face-mid) 28%, var(--face) 62%, var(--face-lo) 100%);
+  border-radius: 12px 12px 24px 24px;
+  padding: 9px 9px 11px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.65) inset,
+    0 -1px 0 rgba(0,0,0,.14) inset,
+    0 2px 8px rgba(0,0,0,.22);
+  user-select: none;
+  position: relative;
+  border: 1px solid rgba(0,0,0,.12);
+}
+
+/* ===== Brand / solar ===== */
+.brand-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 8px;
+  padding: 1px 3px 2px;
+}
+
+.brand-block { color: #111; }
+.brand {
+  display: block;
+  font-weight: 900;
+  letter-spacing: .18em;
+  font-size: 14.5px;
+  line-height: 1.05;
+  font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+  text-transform: uppercase;
+}
+.model {
+  display: block;
+  font-size: 11.5px;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: .01em;
+  margin-top: 2px;
+  color: #1a1a1a;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+/* Solar cell — bronze/brown segmented panel */
+.solar {
+  width: 62px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12), transparent 40%),
+    repeating-linear-gradient(
+      90deg,
+      #4a3020 0 13px,
+      #2a1a10 13px 14px,
+      #3a2418 14px 27px,
+      #1e140c 27px 28px,
+      #453020 28px 41px,
+      #24180e 41px 42px,
+      #3e281c 42px 55px,
+      #1a120a 55px 56px,
+      #382418 56px 62px
+    );
+  border: 1px solid #1a1008;
+  box-shadow:
+    0 0 0 1px #7a7068,
+    0 1px 2px rgba(0,0,0,.4) inset,
+    0 1px 0 rgba(255,255,255,.25);
+}
+
+/* H.K.E.A.A. — five vertical orange/red ticks + red text; SUPER-FX PLUS blue */
+.approve-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 3px 7px;
+  flex-wrap: nowrap;
+}
+.approve-dots {
+  display: inline-flex;
+  gap: 2.5px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.approve-dots i {
+  display: block;
+  width: 3.5px;
+  height: 8px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f07828, #d02818);
+  box-shadow: 0 0.5px 0 rgba(0,0,0,.25);
+  font-style: normal;
+}
+.approve-text {
+  color: var(--hkeaa);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  white-space: nowrap;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.super-fx {
+  margin-left: auto;
+  font-size: 8.5px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: .05em;
+  color: var(--super-fx);
+  text-transform: uppercase;
+  font-family: Arial, Helvetica, sans-serif;
+  white-space: nowrap;
+}
+
+/* ===== LCD — green-grey, black frame + silver bezel ===== */
+.lcd {
+  background: linear-gradient(180deg, #b0be9e, var(--lcd-bg) 40%, #8e9c7c);
+  border-radius: 3px;
+  padding: 6px 9px 7px;
+  min-height: 72px;
+  box-shadow:
+    0 0 0 2px #1e1e1e,
+    0 0 0 4px #9aa0a8,
+    0 0 0 5px #6a7078,
+    0 3px 7px rgba(0,0,0,.38) inset;
+  margin: 0 1px 9px;
+  position: relative;
+  overflow: hidden;
+}
+.lcd::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.035) 2px,
+    rgba(0,0,0,.035) 3px
+  );
+  pointer-events: none;
+}
+.lcd-indicators {
+  display: flex;
+  gap: 7px;
+  min-height: 12px;
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--lcd-dim);
+  margin-bottom: 2px;
+  position: relative;
+  z-index: 1;
+}
+.ind { opacity: .22; }
+.ind.active { opacity: 1; color: var(--lcd-ink); }
+.ind-box.active {
+  outline: 1px solid var(--lcd-ink);
+  outline-offset: 1px;
+  padding: 0 1px;
+}
+.lcd-expr, .lcd-result {
+  font-family: "Courier New", Consolas, "Noto Sans Mono", monospace;
+  color: var(--lcd-ink);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  z-index: 1;
+}
+.lcd-expr {
+  min-height: 24px;
+  font-size: 18px;
+  letter-spacing: .02em;
+  opacity: .95;
+  text-align: left;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lcd-result {
+  min-height: 28px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.15;
+}
+.lcd.error .lcd-result { font-size: 17px; letter-spacing: .05em; }
+.lcd.fmla-menu .lcd-result {
+  font-size: 15px;
+  letter-spacing: .02em;
+  font-weight: 700;
+  text-align: left;
+}
+.lcd.fmla-menu .lcd-expr { font-size: 15px; }
+.lcd.off { background: #5a6450; }
+.lcd.off .lcd-expr,
+.lcd.off .lcd-result,
+.lcd.off .ind { visibility: hidden; }
+
+/* ===== Keys ===== */
+.keys { display: flex; flex-direction: column; gap: 4.5px; }
+
+.row {
+  display: grid;
+  gap: 4.5px;
+  align-items: stretch;
+}
+.row-top {
+  grid-template-columns: 1fr 1fr 70px 1.15fr 0.85fr;
+  gap: 4.5px;
+  margin-bottom: 3px;
+  align-items: center;
+}
+.row-4 { grid-template-columns: repeat(4, 1fr); }
+.row-6 { grid-template-columns: repeat(6, 1fr); }
+.row-5 { grid-template-columns: repeat(5, 1fr); }
+
+.blue-labs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4.5px;
+  margin: -1px 0 -2px;
+  min-height: 10px;
+  pointer-events: none;
+}
+.blue-labs span {
+  text-align: center;
+  font-size: 7px;
+  font-weight: 800;
+  color: var(--blue-lab);
+  letter-spacing: .02em;
+  line-height: 1;
+}
+
+.key {
+  position: relative;
+  border: none;
+  border-radius: 5px;
+  min-height: 34px;
+  padding: 10px 2px 4px;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--key-dark-hi), var(--key-dark));
+  color: var(--lab);
+  box-shadow:
+    0 2.5px 0 #1e2024,
+    0 1px 0 rgba(255,255,255,.16) inset,
+    0 -1px 0 rgba(0,0,0,.2) inset;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: transform .04s ease, filter .08s;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.key:active, .key.pressed {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #1e2024, 0 1px 2px rgba(0,0,0,.45) inset;
+  filter: brightness(.92);
+}
+.key .lab {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+.key .lab.small { font-size: 9px; }
+.key .lab.tiny { font-size: 8px; line-height: 1.05; text-align: center; }
+.key .lab sup { font-size: .65em; }
+.key .face-shift, .key .face-alpha {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.key .face-shift { color: var(--shift-col); }
+.key .face-alpha {
+  color: var(--alpha-col);
+  text-align: right;
+  left: auto;
+  width: 40%;
+}
+.key:has(.face-shift):has(.face-alpha) .face-shift {
+  text-align: left;
+  right: 42%;
+}
+
+/* Above-key printed labels (on silver face) */
+.above {
+  display: grid;
+  gap: 4.5px;
+  margin-bottom: -1px;
+  min-height: 11px;
+  pointer-events: none;
+}
+.above-4 { grid-template-columns: repeat(4, 1fr); }
+.above-6 { grid-template-columns: repeat(6, 1fr); }
+.above-5 { grid-template-columns: repeat(5, 1fr); }
+.above span {
+  text-align: center;
+  font-size: 7.5px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--shift-col);
+}
+.above span.alpha { color: var(--alpha-col); }
+.above span.blue { color: var(--blue-lab); }
+.above span.split {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+.above span.dim { opacity: .0; }
+
+/* Top pill keys — flatter ovals */
+.key-pill {
+  border-radius: 999px;
+  min-height: 24px;
+  height: 26px;
+  padding: 2px 4px;
+  align-items: center;
+  background: linear-gradient(180deg, #5a5e66, #3e4248);
+  box-shadow:
+    0 2px 0 #1a1c20,
+    0 1px 0 rgba(255,255,255,.2) inset;
+}
+.key-pill .lab { font-size: 8.5px; letter-spacing: .03em; font-weight: 800; }
+.key-shift-mod .lab { color: #e8b820; font-weight: 800; }
+.key-alpha-mod .lab { color: #e04848; font-weight: 800; }
+.key-shift-mod.active-mod,
+.key-alpha-mod.active-mod {
+  outline: 2px solid #e8c040;
+  outline-offset: 1px;
+  filter: brightness(1.12);
+}
+
+/* Prog / FMLA — bright orange, rounded oval */
+.key-orange {
+  background: linear-gradient(180deg, var(--key-orange-hi), var(--key-orange) 55%, #d06010);
+  box-shadow:
+    0 2.5px 0 #7a3010,
+    0 1px 0 rgba(255,255,255,.35) inset,
+    0 -1px 0 rgba(0,0,0,.15) inset;
+  min-height: 32px;
+  border-radius: 16px;
+  padding: 6px 2px 5px;
+  align-items: center;
+}
+.key-orange .lab { font-size: 12px; font-weight: 800; color: #fff; letter-spacing: .02em; }
+
+.key-num {
+  background: linear-gradient(180deg, var(--key-num-hi), var(--key-num));
+  min-height: 40px;
+  border-radius: 6px;
+  box-shadow:
+    0 2.5px 0 #050506,
+    0 1px 0 rgba(255,255,255,.1) inset;
+}
+.key-num .lab { font-size: 16px; font-weight: 800; }
+
+.key-op {
+  background: linear-gradient(180deg, #3a3e44, var(--key-op));
+  min-height: 40px;
+}
+.key-op .lab { font-size: 16px; font-weight: 800; }
+
+.key-maroon {
+  background: linear-gradient(180deg, var(--key-maroon-hi), var(--key-maroon));
+  box-shadow:
+    0 2.5px 0 #3a1014,
+    0 1px 0 rgba(255,255,255,.14) inset;
+  min-height: 40px;
+}
+.key-maroon .lab { font-size: 12px; font-weight: 800; color: #fff; }
+
+.key-exe {
+  background: linear-gradient(180deg, #2e3036, #0e0f12);
+  min-height: 40px;
+  box-shadow:
+    0 2.5px 0 #000,
+    0 1px 0 rgba(255,255,255,.12) inset;
+}
+.key-exe .lab { font-size: 13px; font-weight: 900; letter-spacing: .04em; }
+
+.key-func {
+  min-height: 32px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #585c64, #45494f);
+}
+.key-func .lab { font-size: 10.5px; }
+.key-ans { min-height: 40px; background: linear-gradient(180deg, #3a3e44, var(--key-op)); }
+.key-ans .lab { font-size: 12px; }
+
+/* Circular REPLAY pad — silver-grey plastic */
+.replay {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), transparent 45%),
+    linear-gradient(160deg, #e0e4ec, var(--key-replay) 42%, #8a8e98);
+  box-shadow:
+    0 3px 0 #4a4e56,
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 -2px 3px rgba(0,0,0,.22) inset,
+    0 0 0 1px #6a6e76;
+  overflow: hidden;
+  justify-self: center;
+  align-self: center;
+  flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.replay .r-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  color: #3a3e46;
+  pointer-events: none;
+  z-index: 3;
+}
+.replay button.replay-btn {
+  /* Do NOT use .key — that min-height/chrome breaks the pad */
+  position: absolute;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  min-width: 0;
+  background: transparent;
+  color: #2e3238;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  border-radius: 0;
+  transform: none;
+}
+.replay button.replay-btn:active,
+.replay button.replay-btn.pressed {
+  background: rgba(0,0,0,.14);
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+/* Up/down: full-width strips (corners belong to ▲▼) */
+.replay .ru {
+  top: 0; left: 0; right: 0;
+  height: 36%;
+  align-items: flex-start;
+  padding-top: 3px;
+  z-index: 4;
+}
+.replay .rd {
+  bottom: 0; left: 0; right: 0;
+  height: 36%;
+  align-items: flex-end;
+  padding-bottom: 3px;
+  z-index: 4;
+}
+/* Left/right: side strips, inset vertically so they don't steal corners */
+.replay .rl {
+  left: 0; top: 28%; bottom: 28%;
+  width: 36%;
+  justify-content: flex-start;
+  padding-left: 3px;
+  z-index: 2;
+}
+.replay .rr {
+  right: 0; top: 28%; bottom: 28%;
+  width: 36%;
+  justify-content: flex-end;
+  padding-right: 3px;
+  z-index: 2;
+}
+
+.disclaimer {
+  max-width: 400px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #8a9098;
+  text-align: center;
+  padding: 0 8px;
+}
+
+@media (max-width: 380px) {
+  .calc-shell { padding: 9px 8px 13px; border-radius: 16px 16px 28px 28px; }
+  .calc { padding: 7px 6px 9px; }
+  .key { min-height: 30px; }
+  .key-num, .key-op, .key-maroon, .key-exe, .key-ans { min-height: 36px; }
+  .key .lab { font-size: 10px; }
+  .key-num .lab, .key-op .lab { font-size: 14px; }
+  .lcd-expr { font-size: 16px; min-height: 22px; }
+  .lcd-result { font-size: 21px; }
+  .above span, .blue-labs span { font-size: 6.5px; }
+  .row, .keys, .above { gap: 3.5px; }
+  .key-orange { border-radius: 14px; min-height: 30px; }
+  .replay { width: 58px; height: 58px; }
+  .row-top { grid-template-columns: 1fr 1fr 60px 1.15fr 0.85fr; }
+}
+@media (min-width: 480px) {
+  .calc-shell { width: 400px; }
+  .key-num, .key-op, .key-maroon, .key-exe, .key-ans { min-height: 42px; }
+}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="calc-shell">
+    <div class="calc" id="calc" role="application" aria-label="fx-50FH II style calculator">
+      <div class="brand-row">
+        <div class="brand-block">
+          <span class="brand">CASIO</span>
+          <span class="model">fx-50FH II</span>
+        </div>
+        <span class="solar" title="Solar panel (decorative)"></span>
+      </div>
+      <div class="approve-row">
+        <span class="approve-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="approve-text">H.K.E.A.A. APPROVED</span>
+        <span class="super-fx">SUPER-FX PLUS</span>
+      </div>
+
+      <div class="lcd" id="lcd">
+        <div class="lcd-indicators">
+          <span id="ind-shift" class="ind">S</span>
+          <span id="ind-alpha" class="ind">A</span>
+          <span id="ind-hyp" class="ind">hyp</span>
+          <span id="ind-m" class="ind">M</span>
+          <span id="ind-angle" class="ind ind-box active">D</span>
+          <span id="ind-mode" class="ind active">COMP</span>
+        </div>
+        <div class="lcd-expr" id="exprLine"></div>
+        <div class="lcd-result" id="resultLine">0.</div>
+      </div>
+
+      <div class="keys" id="keys">
+        <!-- Top: SHIFT ALPHA | REPLAY | MODE SETUP ON -->
+        <div class="row row-top">
+          <button type="button" class="key key-pill key-shift-mod" data-act="shift"><span class="lab">SHIFT</span></button>
+          <button type="button" class="key key-pill key-alpha-mod" data-act="alpha"><span class="lab">ALPHA</span></button>
+          <div class="replay" aria-label="REPLAY">
+            <span class="r-label">REPLAY</span>
+            <button type="button" class="replay-btn ru" data-act="up" aria-label="up" title="▲ history">▲</button>
+            <button type="button" class="replay-btn rl" data-act="left" aria-label="left" title="◀ cursor">◀</button>
+            <button type="button" class="replay-btn rr" data-act="right" aria-label="right" title="▶ cursor">▶</button>
+            <button type="button" class="replay-btn rd" data-act="down" aria-label="down" title="▼ history">▼</button>
+          </div>
+          <button type="button" class="key key-pill key-func" data-act="mode"
+            data-shift="setup" data-shift-lab="SETUP"><span class="lab tiny">MODE<br>SET UP</span></button>
+          <button type="button" class="key key-pill key-func" data-act="on"
+            data-shift="off" data-shift-lab="OFF"><span class="lab">ON</span></button>
+        </div>
+
+        <!-- Prog FMLA x⁻¹ x³ -->
+        <div class="above above-4">
+          <span>EXIT</span>
+          <span class="dim">·</span>
+          <span class="split"><span style="color:var(--shift-col)">x!</span><span class="blue" style="color:var(--blue-lab);font-size:6.5px">LOGIC</span></span>
+          <span>∛</span>
+        </div>
+        <div class="row row-4">
+          <button type="button" class="key key-orange" data-act="prog" data-shift="exit" data-shift-lab="EXIT"><span class="lab">Prog</span></button>
+          <button type="button" class="key key-orange" data-act="fmla"><span class="lab">FMLA</span></button>
+          <button type="button" class="key key-func" data-act="inv"
+            data-shift="fact" data-shift-lab="x!"><span class="lab">x<sup>−1</sup></span></button>
+          <button type="button" class="key key-func" data-act="cube"
+            data-shift="cbrt" data-shift-lab="∛"><span class="lab">x<sup>3</sup></span></button>
+        </div>
+
+        <!-- ab/c √ x² ^ log ln -->
+        <div class="above above-6">
+          <span>d/c</span>
+          <span class="dim">·</span>
+          <span class="blue">DEC</span>
+          <span class="blue">HEX</span>
+          <span>10ˣ</span>
+          <span>eˣ</span>
+        </div>
+        <div class="row row-6">
+          <button type="button" class="key key-func" data-act="frac"
+            data-shift="mixed" data-shift-lab="d/c"><span class="lab">aᵇ/ᶜ</span></button>
+          <button type="button" class="key key-func" data-act="sqrt"><span class="lab">√</span></button>
+          <button type="button" class="key key-func" data-act="sqr"
+            data-shift="root" data-shift-lab="ˣ√"><span class="lab">x²</span></button>
+          <button type="button" class="key key-func" data-act="pow"><span class="lab">^</span></button>
+          <button type="button" class="key key-func" data-act="log"
+            data-shift="tenx" data-shift-lab="10ˣ"><span class="lab">log</span></button>
+          <button type="button" class="key key-func" data-act="ln"
+            data-shift="ex" data-shift-lab="eˣ"><span class="lab">ln</span></button>
+        </div>
+
+        <div class="blue-labs" aria-hidden="true">
+          <span></span><span></span><span>BIN</span><span>OCT</span><span></span><span></span>
+        </div>
+
+        <!-- (−) °'" hyp sin cos tan -->
+        <div class="above above-6">
+          <span class="alpha">A</span>
+          <span class="alpha">B</span>
+          <span class="alpha">C</span>
+          <span class="split"><span>sin⁻¹</span><span class="alpha">D</span></span>
+          <span class="split"><span>cos⁻¹</span><span class="alpha">E</span></span>
+          <span class="split"><span>tan⁻¹</span><span class="alpha">F</span></span>
+        </div>
+        <div class="row row-6">
+          <button type="button" class="key key-func" data-act="neg"
+            data-alpha="A" data-alpha-lab="A"><span class="lab">(−)</span></button>
+          <button type="button" class="key key-func" data-act="dms"
+            data-alpha="B" data-alpha-lab="B"><span class="lab">° ′ ″</span></button>
+          <button type="button" class="key key-func" data-act="hyp"
+            data-alpha="C" data-alpha-lab="C"><span class="lab">hyp</span></button>
+          <button type="button" class="key key-func" data-act="sin"
+            data-shift="asin" data-shift-lab="sin⁻¹"
+            data-alpha="D" data-alpha-lab="D"><span class="lab">sin</span></button>
+          <button type="button" class="key key-func" data-act="cos"
+            data-shift="acos" data-shift-lab="cos⁻¹"
+            data-alpha="E" data-alpha-lab="E"><span class="lab">cos</span></button>
+          <button type="button" class="key key-func" data-act="tan"
+            data-shift="atan" data-shift-lab="tan⁻¹"
+            data-alpha="F" data-alpha-lab="F"><span class="lab">tan</span></button>
+        </div>
+
+        <!-- RCL ENG ( ) , M+ -->
+        <div class="above above-6">
+          <span>STO</span>
+          <span>←</span>
+          <span>%</span>
+          <span class="split"><span>Abs</span><span class="alpha">X</span></span>
+          <span class="split"><span>;</span><span class="alpha">Y</span></span>
+          <span class="split"><span>M−</span><span class="alpha">M</span></span>
+        </div>
+        <div class="row row-6">
+          <button type="button" class="key key-func" data-act="rcl"
+            data-shift="sto" data-shift-lab="STO"><span class="lab">RCL</span></button>
+          <button type="button" class="key key-func" data-act="eng"
+            data-shift="engback" data-shift-lab="←"><span class="lab">ENG</span></button>
+          <button type="button" class="key key-func" data-act="lparen"
+            data-shift="percent" data-shift-lab="%"><span class="lab">(</span></button>
+          <button type="button" class="key key-func" data-act="rparen"
+            data-shift="abs" data-shift-lab="Abs"
+            data-alpha="X" data-alpha-lab="X"><span class="lab">)</span></button>
+          <button type="button" class="key key-func" data-act="comma"
+            data-alpha="Y" data-alpha-lab="Y"><span class="lab">,</span></button>
+          <button type="button" class="key key-func" data-act="mplus"
+            data-shift="mminus" data-shift-lab="M−"
+            data-alpha="M" data-alpha-lab="M"><span class="lab">M+</span></button>
+        </div>
+
+        <!-- 7 8 9 DEL AC -->
+        <div class="above above-5">
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span>CLR</span>
+          <span>OFF</span>
+        </div>
+        <div class="row row-5">
+          <button type="button" class="key key-num" data-act="7"><span class="lab">7</span></button>
+          <button type="button" class="key key-num" data-act="8"><span class="lab">8</span></button>
+          <button type="button" class="key key-num" data-act="9"><span class="lab">9</span></button>
+          <button type="button" class="key key-maroon" data-act="del"
+            data-shift="ins" data-shift-lab="CLR"><span class="lab">DEL</span></button>
+          <button type="button" class="key key-maroon" data-act="ac"
+            data-shift="off2" data-shift-lab="OFF"><span class="lab">AC</span></button>
+        </div>
+
+        <!-- 4 5 6 × ÷ -->
+        <div class="above above-5">
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span>P</span>
+          <span>C</span>
+        </div>
+        <div class="row row-5">
+          <button type="button" class="key key-num" data-act="4"><span class="lab">4</span></button>
+          <button type="button" class="key key-num" data-act="5"><span class="lab">5</span></button>
+          <button type="button" class="key key-num" data-act="6"><span class="lab">6</span></button>
+          <button type="button" class="key key-op" data-act="mul"
+            data-shift="npr" data-shift-lab="P"><span class="lab">×</span></button>
+          <button type="button" class="key key-op" data-act="div"
+            data-shift="ncr" data-shift-lab="C"><span class="lab">÷</span></button>
+        </div>
+
+        <!-- 1 2 3 + − -->
+        <div class="above above-5">
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span>Pol(</span>
+          <span>Rec(</span>
+        </div>
+        <div class="row row-5">
+          <button type="button" class="key key-num" data-act="1"><span class="lab">1</span></button>
+          <button type="button" class="key key-num" data-act="2"><span class="lab">2</span></button>
+          <button type="button" class="key key-num" data-act="3"><span class="lab">3</span></button>
+          <button type="button" class="key key-op" data-act="add"
+            data-shift="pol" data-shift-lab="Pol("><span class="lab">+</span></button>
+          <button type="button" class="key key-op" data-act="sub"
+            data-shift="rec" data-shift-lab="Rec("><span class="lab">−</span></button>
+        </div>
+
+        <!-- 0 . EXP Ans EXE -->
+        <div class="above above-5">
+          <span class="dim">·</span>
+          <span class="dim">·</span>
+          <span>π</span>
+          <span>DRG►</span>
+          <span>Re⇔Im</span>
+        </div>
+        <div class="row row-5">
+          <button type="button" class="key key-num" data-act="0"><span class="lab">0</span></button>
+          <button type="button" class="key key-num" data-act="dot"><span class="lab">.</span></button>
+          <button type="button" class="key key-num" data-act="exp"
+            data-shift="pi" data-shift-lab="π"
+            data-alpha="econst" data-alpha-lab="e"><span class="lab small">EXP</span></button>
+          <button type="button" class="key key-ans" data-act="ans"
+            data-shift="drg" data-shift-lab="DRG►"><span class="lab">Ans</span></button>
+          <button type="button" class="key key-exe" data-act="eq"><span class="lab">EXE</span></button>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <p class="disclaimer">
+      教育用「fx-50FH II style」網頁複製品，非 Casio 官方產品／商標授權。僅供學習與練習。外觀仿照實機佈局；離線可用（file://）。
+    </p>
+  </div>
+  <script>
+
+(function () {
+  "use strict";
+
+  const MAX_DIGITS = 12;
+  const FRAC_SEP = "」";
+
+  const state = {
+    power: true,
+    shift: false,
+    alpha: false,
+    hyp: false,
+    angle: "DEG",
+    mode: "COMP",
+    menu: null,
+    expr: [],
+    cursor: 0,
+    result: "0.",
+    ans: 0,
+    memory: 0,
+    vars: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, X: 0, Y: 0 },
+    justEvaluated: false,
+    error: null,
+    history: [],
+    histIndex: -1,
+    insertMode: true,
+    showFraction: false,
+    lastFraction: null,
+    stoPending: false,
+    rclPending: false,
+    stoValue: null,
+    confirmVar: null,
+    fmla: {
+      phase: "no",     // no | input | result | multi | error
+      index: 0,
+      varIndex: 0,
+      values: {},
+      multi: null,     // { labels:[], values:[], i:0 }
+      lastId: null,
+      errorKind: null, // "no" when invalid formula number
+    },
+  };
+
+  const el = {
+    lcd: document.getElementById("lcd"),
+    expr: document.getElementById("exprLine"),
+    result: document.getElementById("resultLine"),
+    indShift: document.getElementById("ind-shift"),
+    indAlpha: document.getElementById("ind-alpha"),
+    indHyp: document.getElementById("ind-hyp"),
+    indM: document.getElementById("ind-m"),
+    indAngle: document.getElementById("ind-angle"),
+    indMode: document.getElementById("ind-mode"),
+    shiftBtn: document.querySelector('[data-act="shift"]'),
+    alphaBtn: document.querySelector('[data-act="alpha"]'),
+  };
+
+  function clearMods() {
+    state.shift = false;
+    state.alpha = false;
+  }
+
+  function setError(msg) {
+    state.error = msg;
+    state.justEvaluated = true;
+    updateDisplay();
+  }
+
+  function toSuperscript(n) {
+    const map = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+    return String(n).split("").map((c) => map[c] || c).join("");
+  }
+
+  function formatNumber(n) {
+    if (!isFinite(n)) return null;
+    if (Object.is(n, -0)) n = 0;
+    const abs = Math.abs(n);
+    if (abs !== 0 && (abs >= 1e10 || abs < 1e-9)) {
+      const m = n.toExponential(9).match(/^(-?)(\d+(?:\.\d+)?)e([+-]?\d+)$/);
+      if (m) {
+        let mant = m[2].replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "").replace(/\.$/, "");
+        return (m[1] || "") + mant + "×10" + toSuperscript(parseInt(m[3], 10));
+      }
+    }
+    let s = Number(n.toPrecision(10)).toString();
+    if (s.indexOf(".") === -1 && s.indexOf("e") === -1 && s.indexOf("E") === -1) s += ".";
+    if (s.indexOf("e") !== -1) {
+      const m = Number(n).toExponential(9).match(/^(-?)(\d+(?:\.\d+)?)e([+-]?\d+)$/);
+      if (m) {
+        let mant = m[2].replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "");
+        return (m[1] || "") + mant + "×10" + toSuperscript(parseInt(m[3], 10));
+      }
+    }
+    return s;
+  }
+
+  function isComplex(v) {
+    return !!(v && typeof v === "object" && typeof v.re === "number" && typeof v.im === "number");
+  }
+  function isFiniteValue(v) {
+    if (typeof v === "number") return isFinite(v);
+    if (isComplex(v)) return isFinite(v.re) && isFinite(v.im);
+    return false;
+  }
+  function asComplex(v) {
+    if (isComplex(v)) return { re: v.re, im: v.im };
+    return { re: +v, im: 0 };
+  }
+  function simplifyComplex(re, im) {
+    if (!isFinite(re) || !isFinite(im)) throw new Err("Math ERROR");
+    if (Math.abs(im) < 1e-12) {
+      if (Object.is(re, -0)) re = 0;
+      return re;
+    }
+    if (Math.abs(re) < 1e-12) re = 0;
+    if (Object.is(im, -0)) im = 0;
+    return { re: re, im: im };
+  }
+  function cAdd(a, b) {
+    a = asComplex(a); b = asComplex(b);
+    return simplifyComplex(a.re + b.re, a.im + b.im);
+  }
+  function cSub(a, b) {
+    a = asComplex(a); b = asComplex(b);
+    return simplifyComplex(a.re - b.re, a.im - b.im);
+  }
+  function cMul(a, b) {
+    a = asComplex(a); b = asComplex(b);
+    return simplifyComplex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  }
+  function cDiv(a, b) {
+    a = asComplex(a); b = asComplex(b);
+    const d = b.re * b.re + b.im * b.im;
+    if (d === 0 || !isFinite(d)) throw new Err("Math ERROR");
+    return simplifyComplex((a.re * b.re + a.im * b.im) / d, (a.im * b.re - a.re * b.im) / d);
+  }
+  function cNeg(a) {
+    a = asComplex(a);
+    return simplifyComplex(-a.re, -a.im);
+  }
+  function cAbs(a) {
+    a = asComplex(a);
+    const m = Math.sqrt(a.re * a.re + a.im * a.im);
+    if (!isFinite(m)) throw new Err("Math ERROR");
+    return m;
+  }
+  /** Real-only ops reject non-zero imag */
+  function requireReal(v) {
+    if (isComplex(v)) {
+      if (Math.abs(v.im) >= 1e-12) throw new Err("Math ERROR");
+      return v.re;
+    }
+    return v;
+  }
+  function formatPlainComp(n) {
+    const s = formatNumber(n);
+    if (s == null) return null;
+    // Casio complex display: 2+3i (no trailing "." on components)
+    if (s.endsWith(".") && s.indexOf("×") === -1) return s.slice(0, -1);
+    return s;
+  }
+  function formatValue(v) {
+    if (isComplex(v)) {
+      let re = v.re, im = v.im;
+      if (Math.abs(im) < 1e-12) return formatNumber(re);
+      if (Math.abs(re) < 1e-12) {
+        if (Math.abs(im - 1) < 1e-12) return "i";
+        if (Math.abs(im + 1) < 1e-12) return "-i";
+        const is = formatPlainComp(im);
+        return is == null ? null : is + "i";
+      }
+      const rs = formatPlainComp(re);
+      const imAbs = Math.abs(im);
+      const imBody = Math.abs(imAbs - 1) < 1e-12 ? "i" : (formatPlainComp(imAbs) + "i");
+      if (rs == null || imBody == null || imBody === "nulli") return null;
+      return rs + (im >= 0 ? "+" : "−") + imBody;
+    }
+    return formatNumber(v);
+  }
+
+  function gcd(a, b) {
+    a = Math.abs(Math.round(a));
+    b = Math.abs(Math.round(b));
+    while (b) { const t = b; b = a % b; a = t; }
+    return a || 1;
+  }
+
+  function toFraction(n, maxDen) {
+    maxDen = maxDen || 10000;
+    if (!isFinite(n)) return null;
+    const sign = n < 0 ? -1 : 1;
+    n = Math.abs(n);
+    const whole = Math.floor(n + 1e-12);
+    let frac = n - whole;
+    if (frac < 1e-12) {
+      return { sign, whole, num: 0, den: 1, improperNum: sign * whole, denOut: 1 };
+    }
+    let bestNum = 1, bestDen = 1, bestErr = Math.abs(frac - 1);
+    for (let den = 1; den <= maxDen; den++) {
+      const num = Math.round(frac * den);
+      const err = Math.abs(frac - num / den);
+      if (err < bestErr - 1e-15 || (Math.abs(err - bestErr) < 1e-15 && den < bestDen)) {
+        bestErr = err; bestNum = num; bestDen = den;
+        if (err < 1e-12) break;
+      }
+    }
+    let g = gcd(bestNum, bestDen);
+    bestNum /= g; bestDen /= g;
+    if (bestNum === bestDen) {
+      return { sign, whole: whole + 1, num: 0, den: 1, improperNum: sign * (whole + 1), denOut: 1 };
+    }
+    if (bestNum > bestDen) {
+      const add = Math.floor(bestNum / bestDen);
+      bestNum %= bestDen;
+      return {
+        sign, whole: whole + add, num: bestNum, den: bestDen,
+        improperNum: sign * ((whole + add) * bestDen + bestNum), denOut: bestDen,
+      };
+    }
+    return {
+      sign, whole, num: bestNum, den: bestDen,
+      improperNum: sign * (whole * bestDen + bestNum), denOut: bestDen,
+    };
+  }
+
+  function formatFraction(f) {
+    if (!f) return null;
+    const s = f.sign < 0 ? "-" : "";
+    if (f.num === 0) return s + String(f.whole);
+    if (f.whole === 0) return s + f.num + FRAC_SEP + f.den;
+    return s + f.whole + FRAC_SEP + f.num + FRAC_SEP + f.den;
+  }
+
+  function tokenDisplay(tok) {
+    if (tok === "nCr") return "C";
+    if (tok === "nPr") return "P";
+    return tok;
+  }
+
+  function exprToString() { return state.expr.map(tokenDisplay).join(""); }
+
+  function isDigitLike(t) { return /^[0-9.]$/.test(t) || t === "×10^"; }
+  function isBinaryOp(t) {
+    return t === "+" || t === "−" || t === "×" || t === "÷" || t === "^" || t === "nCr" || t === "nPr" || t === "ˣ√";
+  }
+  function isPostfix(t) { return t === "²" || t === "³" || t === "⁻¹" || t === "!" || t === "%"; }
+  function isPrefixFunc(t) {
+    return /^(sin|cos|tan|sin⁻¹|cos⁻¹|tan⁻¹|sinh|cosh|tanh|sinh⁻¹|cosh⁻¹|tanh⁻¹|log|ln|√|³√|10\^|e\^|Abs)$/.test(t);
+  }
+
+  function isNumberPart(t) {
+    return /^[0-9.]$/.test(t) || t === FRAC_SEP || t === "×10^" || t === "°";
+  }
+  function isVarToken(t) {
+    return t === "M" || t === "Ans" || t === "π" || t === "e" || t === "i" || /^[A-FXY]$/.test(t);
+  }
+  /** Left token can end a value (for Casio implicit ×) */
+  function isValueEnd(t) {
+    return isNumberPart(t) || t === ")" || isVarToken(t) || isPostfix(t);
+  }
+  /** Right token can start a value */
+  function isValueStart(t) {
+    return t === "(" || isNumberPart(t) || isVarToken(t) || isPrefixFunc(t) || t === "(−)";
+  }
+  function needsImplicitMul(left, right) {
+    if (!isValueEnd(left) || !isValueStart(right)) return false;
+    // Keep multi-digit / scientific numbers intact (8 then B → mul; 8 then 0 → same number)
+    if (isNumberPart(left) && isNumberPart(right)) return false;
+    return true;
+  }
+  /** LCD may show 8B; evaluation sees 8×B */
+  function insertImplicitMuls(tokens) {
+    if (!tokens || tokens.length < 2) return tokens ? tokens.slice() : [];
+    const out = [tokens[0]];
+    for (let i = 1; i < tokens.length; i++) {
+      const L = out[out.length - 1];
+      const R = tokens[i];
+      if (needsImplicitMul(L, R)) out.push("×");
+      out.push(R);
+    }
+    return out;
+  }
+
+  function insertToken(tok) {
+    if (state.error) {
+      state.error = null;
+      state.expr = [];
+      state.cursor = 0;
+    }
+    if (state.justEvaluated && !isPostfix(tok) && tok !== ")" && !isBinaryOp(tok)) {
+      if (tok === "Ans" || isDigitLike(tok) || isPrefixFunc(tok) || tok === "(" || tok === "π" || tok === "e" || tok === "i" || tok === FRAC_SEP || tok === "(−)" || tok === "M" || tok === "°" || /^[A-FXY]$/.test(tok)) {
+        state.expr = [];
+        state.cursor = 0;
+      }
+    }
+    if (state.justEvaluated && isBinaryOp(tok)) {
+      state.expr = ["Ans"];
+      state.cursor = 1;
+    }
+    state.justEvaluated = false;
+    state.error = null;
+    state.showFraction = false;
+
+    if (!state.insertMode && state.cursor < state.expr.length) {
+      state.expr[state.cursor] = tok;
+      state.cursor++;
+    } else {
+      state.expr.splice(state.cursor, 0, tok);
+      state.cursor++;
+    }
+  }
+
+  function insertNumberValue(v) {
+    if (!isFinite(v)) { setError("Math ERROR"); return; }
+    if (v < 0) insertToken("(−)");
+    const str = String(Number(Math.abs(v).toPrecision(10)));
+    if (/e/i.test(str)) {
+      const m = Number(Math.abs(v)).toExponential(10).match(/^(\d+(?:\.\d+)?)e([+-]?\d+)$/);
+      if (m) {
+        for (const ch of m[1]) insertToken(ch);
+        insertToken("×10^");
+        const exp = parseInt(m[2], 10);
+        if (exp < 0) insertToken("(−)");
+        for (const ch of String(Math.abs(exp))) insertToken(ch);
+        return;
+      }
+    }
+    for (const ch of str) insertToken(ch);
+  }
+
+  /* -------- Evaluator -------- */
+  function Err(msg) { this.message = msg; this.name = "CalcError"; }
+
+  function toRadians(x) {
+    if (state.angle === "DEG") return (x * Math.PI) / 180;
+    if (state.angle === "GRA") return (x * Math.PI) / 200;
+    return x;
+  }
+  function fromRadians(x) {
+    if (state.angle === "DEG") return (x * 180) / Math.PI;
+    if (state.angle === "GRA") return (x * 200) / Math.PI;
+    return x;
+  }
+
+  function factorial(n) {
+    if (n < 0 || !Number.isInteger(n) || n > 170) throw new Err("Math ERROR");
+    let r = 1;
+    for (let i = 2; i <= n; i++) r *= i;
+    return r;
+  }
+  function nCr(n, r) {
+    if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Err("Math ERROR");
+    r = Math.min(r, n - r);
+    let c = 1;
+    for (let i = 0; i < r; i++) c = (c * (n - i)) / (i + 1);
+    return Math.round(c);
+  }
+  function nPr(n, r) {
+    if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Err("Math ERROR");
+    let p = 1;
+    for (let i = 0; i < r; i++) p *= n - i;
+    return p;
+  }
+
+  function parseFractionTokens(tokens, i) {
+    let s = "";
+    while (i < tokens.length && (/^[0-9.]$/.test(tokens[i]) || tokens[i] === FRAC_SEP || tokens[i] === "×10^" || tokens[i] === "°")) {
+      if (tokens[i] === "×10^") s += "e";
+      else if (tokens[i] === FRAC_SEP) s += "|";
+      else if (tokens[i] === "°") s += "°";
+      else s += tokens[i];
+      i++;
+    }
+    return { s, next: i };
+  }
+
+  function parseNumberString(s) {
+    if (s.indexOf("°") !== -1) {
+      const nums = s.replace(/°$/, "").split("°");
+      if (nums.some((p) => p === "" || !isFinite(parseFloat(p)))) throw new Err("Syntax ERROR");
+      if (nums.length > 3) throw new Err("Syntax ERROR");
+      return parseFloat(nums[0] || "0") + parseFloat(nums[1] || "0") / 60 + parseFloat(nums[2] || "0") / 3600;
+    }
+    if (s.indexOf("|") !== -1) {
+      const parts = s.split("|");
+      if (parts.some((p) => p === "" || p === ".")) throw new Err("Syntax ERROR");
+      if (parts.length === 2) {
+        const a = parseFloat(parts[0]), b = parseFloat(parts[1]);
+        if (!isFinite(a) || !isFinite(b) || b === 0) throw new Err("Math ERROR");
+        return a / b;
+      }
+      if (parts.length === 3) {
+        const w = parseFloat(parts[0]), n = parseFloat(parts[1]), d = parseFloat(parts[2]);
+        if (!isFinite(w) || !isFinite(n) || !isFinite(d) || d === 0) throw new Err("Math ERROR");
+        const sign = w < 0 ? -1 : 1;
+        return sign * (Math.abs(w) + n / d);
+      }
+      throw new Err("Syntax ERROR");
+    }
+    if (s === "" || s === "." || /e[+-]?$/i.test(s)) throw new Err("Syntax ERROR");
+    const v = parseFloat(s);
+    if (!isFinite(v)) throw new Err("Math ERROR");
+    return v;
+  }
+
+  function evaluate(tokens) {
+    if (!tokens.length) return 0;
+    tokens = insertImplicitMuls(tokens);
+    let pos = 0;
+    function peek() { return tokens[pos]; }
+    function consume() { return tokens[pos++]; }
+    function expect(t) { if (peek() !== t) throw new Err("Syntax ERROR"); consume(); }
+
+    function parseExpr() {
+      let left = parseTerm();
+      while (peek() === "+" || peek() === "−") {
+        const op = consume();
+        const right = parseTerm();
+        left = op === "+" ? cAdd(left, right) : cSub(left, right);
+      }
+      return left;
+    }
+    function parseTerm() {
+      let left = parseCombo();
+      while (peek() === "×" || peek() === "÷") {
+        const op = consume();
+        const right = parseCombo();
+        if (op === "×") left = cMul(left, right);
+        else left = cDiv(left, right);
+      }
+      return left;
+    }
+    function parseCombo() {
+      let left = parsePower();
+      while (peek() === "nCr" || peek() === "nPr") {
+        const op = consume();
+        const right = parsePower();
+        const L = requireReal(left), R = requireReal(right);
+        left = op === "nCr" ? nCr(L, R) : nPr(L, R);
+      }
+      return left;
+    }
+    function parsePower() {
+      let left = parseUnary();
+      if (peek() === "ˣ√") {
+        consume();
+        const right = parsePower();
+        left = requireReal(left);
+        const rr = requireReal(right);
+        if (left === 0) throw new Err("Math ERROR");
+        const r = Math.pow(rr, 1 / left);
+        if (!isFinite(r)) throw new Err("Math ERROR");
+        return r;
+      }
+      if (peek() === "^") {
+        consume();
+        const right = parsePower();
+        left = requireReal(left);
+        const rr = requireReal(right);
+        const r = Math.pow(left, rr);
+        if (!isFinite(r)) throw new Err("Math ERROR");
+        return r;
+      }
+      return left;
+    }
+    function parseUnary() {
+      if (peek() === "(−)") { consume(); return cNeg(parseUnary()); }
+      if (peek() === "+") { consume(); return parseUnary(); }
+      const p = peek();
+      if (p && isPrefixFunc(p)) {
+        const fn = consume();
+        let arg;
+        if (peek() === "(") { consume(); arg = parseExpr(); expect(")"); }
+        else arg = parseUnary();
+        return applyPrefix(fn, arg);
+      }
+      return parsePostfix();
+    }
+    function parsePostfix() {
+      let val = parsePrimary();
+      while (true) {
+        const p = peek();
+        if (p === "²") { consume(); val = cMul(val, val); }
+        else if (p === "³") {
+          consume();
+          const r = requireReal(val);
+          val = r * r * r;
+        }
+        else if (p === "⁻¹") { consume(); val = cDiv(1, val); }
+        else if (p === "!") {
+          consume();
+          val = requireReal(val);
+          if (!Number.isInteger(val)) throw new Err("Math ERROR");
+          val = factorial(val);
+        }
+        else if (p === "%") {
+          consume();
+          val = requireReal(val) / 100;
+        }
+        else break;
+        if (!isFiniteValue(val)) throw new Err("Math ERROR");
+      }
+      return val;
+    }
+    function parsePrimary() {
+      const p = peek();
+      if (p === undefined) throw new Err("Syntax ERROR");
+      if (p === "(") { consume(); const v = parseExpr(); expect(")"); return v; }
+      if (p === "Ans") { consume(); return state.ans; }
+      if (p === "π") { consume(); return Math.PI; }
+      if (p === "e") { consume(); return Math.E; }
+      if (p === "i") { consume(); return { re: 0, im: 1 }; }
+      if (p === "M") {
+        consume();
+        const v = state.memory;
+        if (isComplex(v)) return { re: v.re, im: v.im };
+        return (typeof v === "number" && isFinite(v)) ? v : 0;
+      }
+      if (/^[A-FXY]$/.test(p)) {
+        consume();
+        const v = state.vars[p];
+        if (isComplex(v)) return { re: v.re, im: v.im };
+        return (typeof v === "number" && isFinite(v)) ? v : 0;
+      }
+      if (/^[0-9.]$/.test(p) || p === FRAC_SEP || p === "×10^" || p === "°") {
+        const { s, next } = parseFractionTokens(tokens, pos);
+        pos = next;
+        return parseNumberString(s);
+      }
+      throw new Err("Syntax ERROR");
+    }
+    function applyPrefix(fn, x) {
+      if (fn === "Abs") {
+        let r = cAbs(x);
+        if (Math.abs(r) < 1e-12) r = 0;
+        return r;
+      }
+      x = requireReal(x);
+      let r;
+      switch (fn) {
+        case "sin": r = Math.sin(toRadians(x)); break;
+        case "cos": r = Math.cos(toRadians(x)); break;
+        case "tan": {
+          const c = Math.cos(toRadians(x));
+          if (Math.abs(c) < 1e-14) throw new Err("Math ERROR");
+          r = Math.sin(toRadians(x)) / c;
+          break;
+        }
+        case "sin⁻¹": if (x < -1 || x > 1) throw new Err("Math ERROR"); r = fromRadians(Math.asin(x)); break;
+        case "cos⁻¹": if (x < -1 || x > 1) throw new Err("Math ERROR"); r = fromRadians(Math.acos(x)); break;
+        case "tan⁻¹": r = fromRadians(Math.atan(x)); break;
+        case "sinh": r = Math.sinh(x); break;
+        case "cosh": r = Math.cosh(x); break;
+        case "tanh": r = Math.tanh(x); break;
+        case "sinh⁻¹": r = Math.asinh(x); break;
+        case "cosh⁻¹": if (x < 1) throw new Err("Math ERROR"); r = Math.acosh(x); break;
+        case "tanh⁻¹": if (x <= -1 || x >= 1) throw new Err("Math ERROR"); r = Math.atanh(x); break;
+        case "log": if (x <= 0) throw new Err("Math ERROR"); r = Math.log10(x); break;
+        case "ln": if (x <= 0) throw new Err("Math ERROR"); r = Math.log(x); break;
+        case "√": if (x < 0) throw new Err("Math ERROR"); r = Math.sqrt(x); break;
+        case "³√": r = Math.cbrt(x); break;
+        case "10^": r = Math.pow(10, x); break;
+        case "e^": r = Math.exp(x); break;
+        default: throw new Err("Syntax ERROR");
+      }
+      if (!isFinite(r)) throw new Err("Math ERROR");
+      if (Math.abs(r) < 1e-12) r = 0;
+      if (Math.abs(r - Math.round(r)) < 1e-12 && Math.abs(r) < 1e10) r = Math.round(r);
+      else {
+        const q2 = Math.round(r * 2) / 2;
+        if (Math.abs(r - q2) < 1e-12) r = q2;
+      }
+      return r;
+    }
+
+    const result = parseExpr();
+    if (pos < tokens.length) throw new Err("Syntax ERROR");
+    if (!isFiniteValue(result)) throw new Err("Math ERROR");
+    if (isComplex(result)) {
+      if (Math.abs(result.im) < 1e-12) return result.re;
+      return result;
+    }
+    return result;
+  }
+
+
+  /* -------- FMLA built-in formula library (O1–O23) -------- */
+  function deg2rad(d) { return d * Math.PI / 180; }
+  function erfApprox(x) {
+    // Abramowitz & Stegun 7.1.26
+    const sign = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+    const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const t = 1 / (1 + p * x);
+    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y;
+  }
+  function phiStd(x) {
+    return 0.5 * (1 + erfApprox(x / Math.SQRT2));
+  }
+  function fmlaMathCheck(v) {
+    if (v === null || v === undefined || (typeof v === "number" && !isFinite(v))) {
+      throw new Err("Math ERROR");
+    }
+    return v;
+  }
+
+  const FMLA_LIB = [
+    {
+      id: 1, zh: "一元二次方程", en: "Quadratic",
+      vars: [
+        { key: "a", prompt: "a?" },
+        { key: "b", prompt: "b?" },
+        { key: "c", prompt: "c?" },
+      ],
+      compute(v) {
+        const a = v.a, b = v.b, c = v.c;
+        if (a === 0) throw new Err("Math ERROR");
+        const d = b * b - 4 * a * c;
+        const twoA = 2 * a;
+        if (d >= 0) {
+          const s = Math.sqrt(d);
+          const x1 = (-b + s) / twoA;
+          const x2 = (-b - s) / twoA;
+          return { multi: [
+            { label: "X1=", value: x1 },
+            { label: "X2=", value: x2 },
+          ]};
+        }
+        const re = -b / twoA;
+        const im = Math.sqrt(-d) / Math.abs(twoA);
+        const fmtC = (rePart, imPart, sign) => {
+          const r = formatNumber(rePart);
+          const i = formatNumber(imPart);
+          return r + (sign > 0 ? "+" : "−") + i + "i";
+        };
+        // Show complex as text results (Ans = real part of X1)
+        return { multi: [
+          { label: "X1=", value: re, text: fmtC(re, im, 1) },
+          { label: "X2=", value: re, text: fmtC(re, im, -1) },
+        ]};
+      },
+    },
+    {
+      id: 2, zh: "餘弦定律", en: "Cosine law",
+      vars: [
+        { key: "a", prompt: "a?" },
+        { key: "b", prompt: "b?" },
+        { key: "C", prompt: "C°?" },
+      ],
+      compute(v) {
+        // c² = a²+b²−2ab cos C  → side c
+        const c2 = v.a * v.a + v.b * v.b - 2 * v.a * v.b * Math.cos(deg2rad(v.C));
+        if (c2 < 0) throw new Err("Math ERROR");
+        return Math.sqrt(c2);
+      },
+    },
+    {
+      id: 3, zh: "希羅公式", en: "Heron",
+      vars: [
+        { key: "a", prompt: "a?" },
+        { key: "b", prompt: "b?" },
+        { key: "c", prompt: "c?" },
+      ],
+      compute(v) {
+        const a = v.a, b = v.b, c = v.c;
+        if (a <= 0 || b <= 0 || c <= 0) throw new Err("Math ERROR");
+        if (a + b <= c || a + c <= b || b + c <= a) throw new Err("Math ERROR");
+        const s = (a + b + c) / 2;
+        const area2 = s * (s - a) * (s - b) * (s - c);
+        if (area2 < 0) throw new Err("Math ERROR");
+        return Math.sqrt(area2);
+      },
+    },
+    {
+      id: 4, zh: "標準常態 P(x)", en: "Normal P(x)",
+      vars: [{ key: "x", prompt: "x?" }],
+      compute(v) { return phiStd(v.x); },
+    },
+    {
+      id: 5, zh: "標準常態 Q(x)", en: "Normal Q(x)",
+      vars: [{ key: "x", prompt: "x?" }],
+      compute(v) { return 1 - phiStd(v.x); },
+    },
+    {
+      id: 6, zh: "庫倫定律", en: "Coulomb",
+      vars: [
+        { key: "q1", prompt: "q1?" },
+        { key: "q2", prompt: "q2?" },
+        { key: "r", prompt: "r?" },
+      ],
+      compute(v) {
+        if (v.r === 0) throw new Err("Math ERROR");
+        const k = 8.9875517923e9;
+        return k * Math.abs(v.q1 * v.q2) / (v.r * v.r);
+      },
+    },
+    {
+      id: 7, zh: "導電體電阻", en: "Resistance",
+      vars: [
+        { key: "ρ", prompt: "ρ?" },
+        { key: "L", prompt: "L?" },
+        { key: "A", prompt: "A?" },
+      ],
+      compute(v) {
+        if (v.A === 0) throw new Err("Math ERROR");
+        return v["ρ"] * v.L / v.A;
+      },
+    },
+    {
+      id: 8, zh: "磁力", en: "Magnetic F",
+      vars: [
+        { key: "B", prompt: "B?" },
+        { key: "I", prompt: "I?" },
+        { key: "L", prompt: "L?" },
+        { key: "θ", prompt: "θ°?" },
+      ],
+      compute(v) {
+        return v.B * v.I * v.L * Math.sin(deg2rad(v["θ"]));
+      },
+    },
+    {
+      id: 9, zh: "RC電路 R終端電壓", en: "RC VR(t)",
+      vars: [
+        { key: "E", prompt: "E?" },
+        { key: "R", prompt: "R?" },
+        { key: "C", prompt: "C?" },
+        { key: "t", prompt: "t?" },
+      ],
+      compute(v) {
+        // VR = E·exp(−t/(R·C))  discharge across R
+        if (v.R === 0 || v.C === 0) throw new Err("Math ERROR");
+        return v.E * Math.exp(-v.t / (v.R * v.C));
+      },
+    },
+    {
+      id: 10, zh: "電壓增益", en: "Voltage gain",
+      vars: [
+        { key: "Vo", prompt: "Vo?" },
+        { key: "Vi", prompt: "Vi?" },
+      ],
+      compute(v) {
+        if (v.Vi === 0 || v.Vo / v.Vi <= 0) throw new Err("Math ERROR");
+        return 20 * Math.log10(v.Vo / v.Vi);
+      },
+    },
+    {
+      id: 11, zh: "LRC串聯阻抗", en: "LRC series Z",
+      vars: [
+        { key: "R", prompt: "R?" },
+        { key: "L", prompt: "L?" },
+        { key: "C", prompt: "C?" },
+        { key: "f", prompt: "f?" },
+      ],
+      compute(v) {
+        if (v.C === 0 || v.f === 0) throw new Err("Math ERROR");
+        const w = 2 * Math.PI * v.f;
+        const x = w * v.L - 1 / (w * v.C);
+        return Math.sqrt(v.R * v.R + x * x);
+      },
+    },
+    {
+      id: 12, zh: "LRC並聯阻抗", en: "LRC parallel Z",
+      vars: [
+        { key: "R", prompt: "R?" },
+        { key: "L", prompt: "L?" },
+        { key: "C", prompt: "C?" },
+        { key: "f", prompt: "f?" },
+      ],
+      compute(v) {
+        if (v.R === 0 || v.L === 0 || v.f === 0) throw new Err("Math ERROR");
+        const w = 2 * Math.PI * v.f;
+        const y = w * v.C - 1 / (w * v.L);
+        const den = Math.sqrt(1 / (v.R * v.R) + y * y);
+        if (den === 0) throw new Err("Math ERROR");
+        return 1 / den;
+      },
+    },
+    {
+      id: 13, zh: "電震動頻率", en: "LC freq",
+      vars: [
+        { key: "L", prompt: "L?" },
+        { key: "C", prompt: "C?" },
+      ],
+      compute(v) {
+        if (v.L <= 0 || v.C <= 0) throw new Err("Math ERROR");
+        return 1 / (2 * Math.PI * Math.sqrt(v.L * v.C));
+      },
+    },
+    {
+      id: 14, zh: "下降距離", en: "Drop dist",
+      vars: [
+        { key: "t", prompt: "t?" },
+        { key: "g", prompt: "g?", optional: true, default: 9.8 },
+      ],
+      compute(v) {
+        const g = (v.g === undefined || v.g === null || Number.isNaN(v.g)) ? 9.8 : v.g;
+        return 0.5 * g * v.t * v.t;
+      },
+    },
+    {
+      id: 15, zh: "單擺周期", en: "Pendulum T",
+      vars: [
+        { key: "L", prompt: "L?" },
+        { key: "g", prompt: "g?", optional: true, default: 9.8 },
+      ],
+      compute(v) {
+        const g = (v.g === undefined || v.g === null || Number.isNaN(v.g)) ? 9.8 : v.g;
+        if (g <= 0 || v.L < 0) throw new Err("Math ERROR");
+        return 2 * Math.PI * Math.sqrt(v.L / g);
+      },
+    },
+    {
+      id: 16, zh: "彈簧擺周期", en: "Spring T",
+      vars: [
+        { key: "m", prompt: "m?" },
+        { key: "k", prompt: "k?" },
+      ],
+      compute(v) {
+        if (v.k <= 0 || v.m < 0) throw new Err("Math ERROR");
+        return 2 * Math.PI * Math.sqrt(v.m / v.k);
+      },
+    },
+    {
+      id: 17, zh: "多普勒效應", en: "Doppler",
+      // f' = f·V/(V−Vs)  source toward observer
+      vars: [
+        { key: "f", prompt: "f?" },
+        { key: "V", prompt: "V?" },
+        { key: "Vs", prompt: "Vs?" },
+      ],
+      compute(v) {
+        if (v.V - v.Vs === 0) throw new Err("Math ERROR");
+        return v.f * v.V / (v.V - v.Vs);
+      },
+    },
+    {
+      id: 18, zh: "理想氣體定律", en: "Ideal gas",
+      // P = nRT/V
+      vars: [
+        { key: "n", prompt: "n?" },
+        { key: "T", prompt: "T?" },
+        { key: "V", prompt: "V?" },
+        { key: "R", prompt: "R?", optional: true, default: 8.314 },
+      ],
+      compute(v) {
+        const R = (v.R === undefined || v.R === null || Number.isNaN(v.R)) ? 8.314 : v.R;
+        if (v.V === 0) throw new Err("Math ERROR");
+        return v.n * R * v.T / v.V;
+      },
+    },
+    {
+      id: 19, zh: "離心力", en: "Centrifugal",
+      vars: [
+        { key: "m", prompt: "m?" },
+        { key: "v", prompt: "v?" },
+        { key: "r", prompt: "r?" },
+      ],
+      compute(v) {
+        if (v.r === 0) throw new Err("Math ERROR");
+        return v.m * v.v * v.v / v.r;
+      },
+    },
+    {
+      id: 20, zh: "彈性能", en: "Elastic U",
+      vars: [
+        { key: "k", prompt: "k?" },
+        { key: "x", prompt: "x?" },
+      ],
+      compute(v) { return 0.5 * v.k * v.x * v.x; },
+    },
+    {
+      id: 21, zh: "伯努利定律", en: "Bernoulli",
+      // P2 = P1 + ρg(h1−h2) + ½ρ(v1²−v2²)
+      vars: [
+        { key: "P1", prompt: "P1?" },
+        { key: "ρ", prompt: "ρ?" },
+        { key: "h1", prompt: "h1?" },
+        { key: "h2", prompt: "h2?" },
+        { key: "v1", prompt: "v1?" },
+        { key: "v2", prompt: "v2?" },
+      ],
+      compute(v) {
+        const g = 9.8;
+        const rho = v["ρ"];
+        return v.P1 + rho * g * (v.h1 - v.h2) + 0.5 * rho * (v.v1 * v.v1 - v.v2 * v.v2);
+      },
+    },
+    {
+      id: 22, zh: "視距計算(高度)", en: "Stadia H",
+      // H = (k·s·sin(2θ))/2 + C·sinθ
+      vars: [
+        { key: "k", prompt: "k?" },
+        { key: "s", prompt: "s?" },
+        { key: "θ", prompt: "θ°?" },
+        { key: "C", prompt: "C?" },
+      ],
+      compute(v) {
+        const th = deg2rad(v["θ"]);
+        return (v.k * v.s * Math.sin(2 * th)) / 2 + v.C * Math.sin(th);
+      },
+    },
+    {
+      id: 23, zh: "視距計算(距離)", en: "Stadia D",
+      // D = k·s·cos²θ + C·cosθ
+      vars: [
+        { key: "k", prompt: "k?" },
+        { key: "s", prompt: "s?" },
+        { key: "θ", prompt: "θ°?" },
+        { key: "C", prompt: "C?" },
+      ],
+      compute(v) {
+        const th = deg2rad(v["θ"]);
+        const c = Math.cos(th);
+        return v.k * v.s * c * c + v.C * c;
+      },
+    },
+  ];
+
+  function fmlaResetList(keepIndex) {
+    state.fmla.phase = "no";
+    if (!keepIndex) state.fmla.index = 0;
+    state.fmla.varIndex = 0;
+    state.fmla.values = {};
+    state.fmla.multi = null;
+    state.fmla.lastId = null;
+    state.fmla.errorKind = null;
+    state.expr = [];
+    state.cursor = 0;
+    state.error = null;
+    state.justEvaluated = false;
+    state.result = "";
+  }
+
+  /** Parse 1–2 digit FMLA No (01→O1, 23→O23) → 0-based index or throw */
+  function fmlaParseNo() {
+    if (!state.expr.length) throw new Err("Math ERROR");
+    const raw = state.expr.join("");
+    if (!/^\d{1,2}$/.test(raw)) throw new Err("Math ERROR");
+    const n = parseInt(raw, 10);
+    if (!isFinite(n) || n < 1 || n > FMLA_LIB.length) throw new Err("Math ERROR");
+    return n - 1; // 0-based
+  }
+
+  function fmlaAcceptNo() {
+    try {
+      const idx = fmlaParseNo();
+      fmlaStartFormula(idx);
+      updateDisplay();
+    } catch (e) {
+      state.menu = "FMLA";
+      state.fmla.phase = "error";
+      state.fmla.errorKind = "no";
+      // Clear bad digits so DEL/EXE returns to clean No?
+      state.expr = [];
+      state.cursor = 0;
+      setError(e.message || "Math ERROR");
+    }
+  }
+
+  function fmlaExit() {
+    state.menu = null;
+    fmlaResetList(false);
+    state.result = formatNumber(state.ans);
+    state.justEvaluated = true;
+    state.mode = "COMP";
+  }
+
+  function fmlaOpen() {
+    state.menu = "FMLA";
+    state.stoPending = false;
+    state.rclPending = false;
+    state.stoValue = null;
+    state.confirmVar = null;
+    fmlaResetList(false);
+    clearMods();
+    updateDisplay();
+  }
+
+  function fmlaCurrent() {
+    return FMLA_LIB[state.fmla.index];
+  }
+
+  function fmlaStartFormula(idx) {
+    state.fmla.index = idx;
+    state.fmla.phase = "input";
+    state.fmla.varIndex = 0;
+    state.fmla.values = {};
+    state.fmla.multi = null;
+    state.fmla.lastId = FMLA_LIB[idx].id;
+    state.expr = [];
+    state.cursor = 0;
+    state.error = null;
+    state.justEvaluated = false;
+    state.result = "";
+    // Pre-fill optional default hint on result line via updateDisplay
+  }
+
+  function fmlaParseInputValue(spec) {
+    if (!state.expr.length) {
+      if (spec.optional && spec.default !== undefined) return spec.default;
+      throw new Err("Syntax ERROR");
+    }
+    const val = evaluate(state.expr);
+    if (!isFinite(val)) throw new Err("Math ERROR");
+    return val;
+  }
+
+  function fmlaAcceptVar() {
+    const f = fmlaCurrent();
+    const spec = f.vars[state.fmla.varIndex];
+    let val;
+    try {
+      val = fmlaParseInputValue(spec);
+    } catch (e) {
+      state.menu = "FMLA";
+      state.fmla.phase = "error";
+      state.fmla.errorKind = null;
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    state.fmla.values[spec.key] = val;
+    state.expr = [];
+    state.cursor = 0;
+    state.fmla.varIndex++;
+    if (state.fmla.varIndex >= f.vars.length) {
+      fmlaRunCompute();
+    } else {
+      state.result = "";
+      state.justEvaluated = false;
+      updateDisplay();
+    }
+  }
+
+  function fmlaRunCompute() {
+    const f = fmlaCurrent();
+    try {
+      const out = f.compute(state.fmla.values);
+      if (out && typeof out === "object" && out.multi) {
+        state.fmla.multi = { items: out.multi, i: 0 };
+        state.fmla.phase = "multi";
+        const item = out.multi[0];
+        state.ans = typeof item.value === "number" ? item.value : state.ans;
+        state.result = item.text || formatNumber(item.value);
+        state.justEvaluated = true;
+        state.error = null;
+      } else {
+        const num = fmlaMathCheck(out);
+        state.ans = num;
+        state.result = formatNumber(num);
+        state.fmla.phase = "result";
+        state.justEvaluated = true;
+        state.error = null;
+        state.history.push({ expr: ["FMLA", "O" + f.id], value: num });
+        if (state.history.length > 30) state.history.shift();
+        state.histIndex = state.history.length;
+      }
+    } catch (e) {
+      state.menu = "FMLA";
+      state.fmla.phase = "error";
+      state.fmla.errorKind = null;
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    updateDisplay();
+  }
+
+  function fmlaHandle(act) {
+    // SHIFT+EXIT / Prog EXIT already dispatched separately; AC / EXIT here
+    if (act === "ac" || act === "on") {
+      if (act === "on") { state.power = true; }
+      fmlaExit();
+      doAC();
+      return true;
+    }
+    if (act === "prog") {
+      // bare Prog while in FMLA exits (EXIT is SHIFT+Prog)
+      fmlaExit();
+      updateDisplay();
+      return true;
+    }
+    if (act === "fmla") {
+      fmlaResetList(false);
+      updateDisplay();
+      return true;
+    }
+    if (act === "shift") {
+      state.shift = !state.shift;
+      state.alpha = false;
+      updateDisplay();
+      return true;
+    }
+    // Allow SHIFT+EXIT while in FMLA
+    if (state.shift) {
+      const btn = document.querySelector(`[data-act="${act}"]`);
+      if (btn && btn.dataset.shift === "exit") {
+        state.shift = false;
+        fmlaExit();
+        updateDisplay();
+        return true;
+      }
+      if (btn && btn.dataset.shift === "off") {
+        state.shift = false;
+        state.power = false;
+        updateDisplay();
+        return true;
+      }
+      // ignore other shift combos in FMLA
+      state.shift = false;
+    }
+
+    const phase = state.fmla.phase;
+
+    if (phase === "error") {
+      if (act === "del" || act === "eq") {
+        state.error = null;
+        // Invalid No? → back to No? prompt; formula Math ERROR → No? too
+        fmlaResetList(false);
+        updateDisplay();
+      }
+      return true;
+    }
+
+    if (phase === "no") {
+      // Optional: EXE confirms if at least one digit (primary path is auto on 2 digits)
+      if (act === "eq") {
+        if (state.expr.length) fmlaAcceptNo();
+        return true;
+      }
+      if (act === "del") {
+        if (state.expr.length) {
+          if (state.cursor > 0) {
+            state.expr.splice(state.cursor - 1, 1);
+            state.cursor--;
+          }
+          updateDisplay();
+          return true;
+        }
+        // empty No? + DEL → exit to COMP
+        fmlaExit();
+        updateDisplay();
+        return true;
+      }
+      if (act === "left" || act === "right") {
+        if (act === "left" && state.cursor > 0) state.cursor--;
+        if (act === "right" && state.cursor < state.expr.length) state.cursor++;
+        updateDisplay();
+        return true;
+      }
+      // Two-digit Casio entry: 01…23 auto-opens on 2nd digit (no EXE)
+      const noMap = {
+        "0": "0", "1": "1", "2": "2", "3": "3", "4": "4",
+        "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
+      };
+      if (noMap[act]) {
+        if (state.expr.length >= 2) return true;
+        insertToken(noMap[act]);
+        if (state.expr.length >= 2) {
+          // Complete code → open formula or Math ERROR (00, 24–99)
+          fmlaAcceptNo();
+        } else {
+          updateDisplay(); // partial first digit
+        }
+        return true;
+      }
+      return true;
+    }
+
+    if (phase === "input") {
+      if (act === "eq") {
+        fmlaAcceptVar();
+        return true;
+      }
+      if (act === "del") {
+        if (state.error) { state.error = null; updateDisplay(); return true; }
+        if (state.expr.length) {
+          if (state.cursor > 0) {
+            state.expr.splice(state.cursor - 1, 1);
+            state.cursor--;
+          }
+          updateDisplay();
+          return true;
+        }
+        // empty input: go back previous var or list
+        if (state.fmla.varIndex > 0) {
+          state.fmla.varIndex--;
+          const prevKey = fmlaCurrent().vars[state.fmla.varIndex].key;
+          delete state.fmla.values[prevKey];
+          updateDisplay();
+        } else {
+          fmlaResetList(false);
+          updateDisplay();
+        }
+        return true;
+      }
+      if (act === "up" || act === "down" || act === "left" || act === "right") {
+        if (act === "left" && state.cursor > 0) state.cursor--;
+        if (act === "right" && state.cursor < state.expr.length) state.cursor++;
+        updateDisplay();
+        return true;
+      }
+      // digit / ops for number entry — reuse insertToken path lightly
+      const digitMap = {
+        "0":"0","1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9",
+        "dot":".", "sub":"−", "add":"+", "mul":"×", "div":"÷",
+        "lparen":"(", "rparen":")", "pow":"^", "neg":"(−)", "exp":"×10^",
+        "ans":"Ans", "sqrt":"√", "pi":"π",
+      };
+      if (digitMap[act]) {
+        insertToken(digitMap[act]);
+        updateDisplay();
+        return true;
+      }
+      return true;
+    }
+
+    if (phase === "multi") {
+      if (act === "eq") {
+        const m = state.fmla.multi;
+        if (m.i + 1 < m.items.length) {
+          m.i++;
+          const item = m.items[m.i];
+          state.ans = typeof item.value === "number" ? item.value : state.ans;
+          state.result = item.text || formatNumber(item.value);
+          updateDisplay();
+        } else {
+          // after last root: re-run same formula
+          fmlaStartFormula(state.fmla.index);
+          updateDisplay();
+        }
+        return true;
+      }
+      if (act === "del") {
+        fmlaResetList(false);
+        updateDisplay();
+        return true;
+      }
+      return true;
+    }
+
+    if (phase === "result") {
+      if (act === "eq") {
+        // re-run same formula
+        fmlaStartFormula(state.fmla.index);
+        updateDisplay();
+        return true;
+      }
+      if (act === "del") {
+        fmlaResetList(false);
+        updateDisplay();
+        return true;
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  function fmlaUpdateDisplay() {
+    const phase = state.fmla.phase;
+    el.indMode.textContent = "FMLA";
+    el.indMode.classList.add("active");
+    el.lcd.classList.toggle("fmla-menu", phase === "no");
+
+    if (phase === "no") {
+      // Hint on top; Casio-style "No?" prompt + typed formula number
+      el.expr.textContent = "FMLA O01-O23";
+      let exprStr = "";
+      for (let i = 0; i < state.expr.length; i++) {
+        if (i === state.cursor) exprStr += "▌";
+        exprStr += state.expr[i];
+      }
+      if (state.cursor >= state.expr.length) exprStr += "▌";
+      el.result.textContent = state.expr.length ? exprStr : "No?▌";
+      return true;
+    }
+    if (phase === "error") {
+      if (state.fmla.errorKind === "no") {
+        el.expr.textContent = "FMLA No?";
+      } else {
+        const f = fmlaCurrent();
+        const oLabel = "O" + String(f.id).padStart(2, "0");
+        el.expr.textContent = oLabel + " " + f.zh;
+      }
+      el.result.textContent = state.error || "Math ERROR";
+      return true;
+    }
+    const f = fmlaCurrent();
+    const oLabel = "O" + String(f.id).padStart(2, "0");
+    if (state.fmla.phase === "input") {
+      const spec = f.vars[state.fmla.varIndex];
+      let prompt = oLabel + " " + spec.prompt;
+      if (spec.optional && spec.default !== undefined) {
+        prompt = oLabel + " " + spec.prompt.replace("?", "") + "(=" + spec.default + ")?";
+      }
+      // O17 documents form f'=f·V/(V−Vs) on first prompt line
+      if (f.id === 17 && state.fmla.varIndex === 0) {
+        el.expr.textContent = "f'=fV/(V-Vs) f?";
+      } else {
+        el.expr.textContent = prompt;
+      }
+      let exprStr = "";
+      for (let i = 0; i < state.expr.length; i++) {
+        if (i === state.cursor) exprStr += "▌";
+        exprStr += state.expr[i];
+      }
+      if (state.cursor >= state.expr.length) exprStr += "▌";
+      el.result.textContent = exprStr || (spec.optional ? String(spec.default) + "?" : "");
+      // For optional with empty: show default as ghost on result already
+      if (!state.expr.length && spec.optional) {
+        el.result.textContent = "▌"; // empty means accept default on EXE
+      }
+      return true;
+    }
+    if (state.fmla.phase === "multi") {
+      const item = state.fmla.multi.items[state.fmla.multi.i];
+      el.expr.textContent = oLabel + " " + item.label;
+      el.result.textContent = item.text || formatNumber(item.value);
+      return true;
+    }
+    if (state.fmla.phase === "result") {
+      el.expr.textContent = oLabel + " " + f.zh;
+      el.result.textContent = state.result;
+      return true;
+    }
+    return false;
+  }
+
+
+
+  function letterFromButton(btn) {
+    if (!btn || !btn.dataset.alpha) return null;
+    const a = btn.dataset.alpha;
+    if (a === "M" || /^[A-FXY]$/.test(a)) return a;
+    return null;
+  }
+
+  /** Value for STO: typed entry first, else Ans after EXE; else Math ERROR */
+  function resolveEntryValue() {
+    if (state.expr.length > 0 && !state.justEvaluated) {
+      const v = evaluate(state.expr);
+      if (!isFiniteValue(v)) throw new Err("Math ERROR");
+      return v;
+    }
+    if (state.justEvaluated) {
+      if (!isFiniteValue(state.ans)) throw new Err("Math ERROR");
+      return state.ans;
+    }
+    throw new Err("Math ERROR");
+  }
+
+  function beginSto() {
+    try {
+      const v = resolveEntryValue();
+      state.stoValue = v;
+      state.stoPending = true;
+      state.rclPending = false;
+      state.confirmVar = null;
+      state.menu = null;
+      clearMods();
+      updateDisplay();
+    } catch (e) {
+      state.stoPending = false;
+      state.stoValue = null;
+      setError(e.message || "Math ERROR");
+    }
+  }
+
+  function beginRcl() {
+    state.rclPending = true;
+    state.stoPending = false;
+    state.stoValue = null;
+    state.confirmVar = null;
+    state.menu = null;
+    clearMods();
+    updateDisplay();
+  }
+
+  function finishSto(letter) {
+    const v = state.stoValue;
+    state.stoPending = false;
+    state.stoValue = null;
+    if (v === null || v === undefined || !isFiniteValue(v)) {
+      setError("Math ERROR");
+      return;
+    }
+    if (letter === "M") state.memory = v;
+    else state.vars[letter] = v;
+    state.ans = v;
+    state.result = formatValue(v);
+    state.expr = [];
+    state.cursor = 0;
+    state.justEvaluated = true;
+    state.error = null;
+    state.confirmVar = letter;
+    clearMods();
+    updateDisplay();
+  }
+
+  function finishRcl(letter) {
+    state.rclPending = false;
+    // Insert letter into expression so formulas can use B, D, … (value may be complex)
+    insertToken(letter);
+    updateDisplay();
+  }
+
+  /* -------- Actions -------- */
+  function fractionFits(v, f) {
+    if (!f || f.num === 0) return false;
+    const approx = f.improperNum / f.denOut;
+    return Math.abs(approx - v) <= 1e-10 * Math.max(1, Math.abs(v));
+  }
+
+  /** Toggle displayed Ans between fraction and decimal (Casio aᵇ/ᶜ after EXE). */
+  function toggleFractionDecimal() {
+    const v = state.ans;
+    if (typeof v !== "number" || !isFinite(v)) {
+      setError("Math ERROR");
+      return;
+    }
+    if (!state.showFraction) {
+      const f = toFraction(v);
+      state.lastFraction = f;
+      if (fractionFits(v, f)) {
+        state.result = formatFraction(f);
+        state.showFraction = true;
+      } else {
+        state.result = formatNumber(v);
+        state.showFraction = false;
+      }
+    } else {
+      state.result = formatNumber(v);
+      state.showFraction = false;
+    }
+    state.justEvaluated = true;
+    state.error = null;
+    updateDisplay();
+  }
+
+  function doEquals() {
+    if (state.menu === "FMLA") { fmlaHandle("eq"); return; }
+    if (state.menu) { state.menu = null; updateDisplay(); return; }
+    try {
+      if (!state.expr.length) {
+        state.result = formatValue(state.ans);
+        updateDisplay();
+        return;
+      }
+      const val = evaluate(state.expr);
+      state.ans = val;
+      state.history.push({ expr: state.expr.slice(), value: val });
+      if (state.history.length > 30) state.history.shift();
+      state.histIndex = state.history.length;
+      if (isComplex(val)) {
+        state.lastFraction = null;
+        state.showFraction = false;
+        state.result = formatValue(val);
+      } else {
+        const frac = toFraction(val);
+        state.lastFraction = frac;
+        state.result = state.showFraction && frac && frac.num !== 0 ? formatFraction(frac) : formatNumber(val);
+      }
+      state.justEvaluated = true;
+      state.error = null;
+      state.cursor = state.expr.length;
+    } catch (e) {
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    updateDisplay();
+  }
+
+  function doAC() {
+    state.expr = [];
+    state.cursor = 0;
+    state.result = "0.";
+    state.error = null;
+    state.justEvaluated = false;
+    state.menu = null;
+    state.hyp = false;
+    state.showFraction = false;
+    if (state.fmla) fmlaResetList(false);
+    state.stoPending = false;
+    state.rclPending = false;
+    state.stoValue = null;
+    state.confirmVar = null;
+    clearMods();
+    updateDisplay();
+  }
+
+  function doDEL() {
+    if (state.menu === "FMLA") { fmlaHandle("del"); return; }
+    if (state.menu) { state.menu = null; updateDisplay(); return; }
+    if (state.error) { state.error = null; updateDisplay(); return; }
+    if (state.justEvaluated) {
+      state.justEvaluated = false;
+      state.result = "";
+      updateDisplay();
+      return;
+    }
+    if (state.cursor > 0) {
+      state.expr.splice(state.cursor - 1, 1);
+      state.cursor--;
+    }
+    updateDisplay();
+  }
+
+  function toEng(v, dir) {
+    if (v === 0) return "0";
+    const sign = v < 0 ? "-" : "";
+    v = Math.abs(v);
+    let exp = Math.floor(Math.log10(v));
+    exp = Math.floor(exp / 3) * 3 + dir * 3;
+    const mant = v / Math.pow(10, exp);
+    return sign + Number(mant.toPrecision(10)) + "×10" + toSuperscript(exp);
+  }
+
+  function cycleAngle() {
+    const order = ["DEG", "RAD", "GRA"];
+    state.angle = order[(order.indexOf(state.angle) + 1) % 3];
+  }
+
+  function replay(dir) {
+    // ▲ previous / ▼ next past expressions; then edit + EXE
+    if (!state.history.length) return;
+    if (state.histIndex < 0 || state.histIndex > state.history.length) {
+      state.histIndex = state.history.length;
+    }
+    // First ▲ from "after EXE" (histIndex === length) steps onto last entry
+    state.histIndex += dir;
+    if (state.histIndex < 0) state.histIndex = 0;
+    if (state.histIndex >= state.history.length) {
+      state.histIndex = state.history.length;
+      state.expr = [];
+      state.cursor = 0;
+      state.result = formatValue(state.ans);
+      state.justEvaluated = true;
+      state.error = null;
+      updateDisplay();
+      return;
+    }
+    const h = state.history[state.histIndex];
+    state.expr = h.expr.slice();
+    state.cursor = state.expr.length;
+    state.result = formatValue(h.value);
+    state.ans = h.value;
+    // Editable immediately (cursor visible); result kept until re-EXE
+    state.justEvaluated = false;
+    state.error = null;
+    state.showFraction = false;
+    clearMods();
+    updateDisplay();
+  }
+
+  function memoryAdd(sign) {
+    try {
+      const v = state.justEvaluated || !state.expr.length ? state.ans : evaluate(state.expr);
+      state.memory = cAdd(state.memory, cMul(sign, v));
+      state.ans = v;
+      state.result = formatValue(v);
+      state.justEvaluated = true;
+    } catch (e) {
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    updateDisplay();
+  }
+
+  function handle(act) {
+    if (!state.power && act !== "on") return;
+
+    if (state.menu === "MODE") {
+      clearMods();
+      if (act === "1") { state.mode = "COMP"; state.menu = null; }
+      else if (act === "2") {
+        state.mode = "CMPLX";
+        state.menu = null;
+        state.expr = [];
+        state.cursor = 0;
+        state.result = "0.";
+        state.justEvaluated = true;
+        state.error = null;
+      }
+      else if (act === "3") { state.mode = "EQN"; state.menu = null; state.result = "EQN: soon"; state.justEvaluated = true; }
+      else if (act === "ac" || act === "del" || act === "on") state.menu = null;
+      updateDisplay();
+      return;
+    }
+    if (state.menu === "SETUP") {
+      clearMods();
+      if (act === "1") { state.angle = "DEG"; state.menu = null; }
+      else if (act === "2") { state.angle = "RAD"; state.menu = null; }
+      else if (act === "3") { state.angle = "GRA"; state.menu = null; }
+      else if (act === "ac" || act === "del") state.menu = null;
+      updateDisplay();
+      return;
+    }
+    if (state.menu === "FMLA") {
+      fmlaHandle(act);
+      return;
+    }
+    if (state.menu === "PROG") {
+      if (act === "ac" || act === "del" || act === "eq" || act === "on") state.menu = null;
+      updateDisplay();
+      return;
+    }
+    if (act === "shift") { state.shift = !state.shift; state.alpha = false; updateDisplay(); return; }
+    if (act === "alpha") {
+      state.alpha = !state.alpha;
+      state.shift = false;
+      // ALPHA cancels pending STO/RCL letter wait
+      state.stoPending = false;
+      state.rclPending = false;
+      state.stoValue = null;
+      updateDisplay();
+      return;
+    }
+    if (act === "hyp") { state.hyp = !state.hyp; updateDisplay(); return; }
+    if (act === "on") {
+      if (state.shift) { state.power = false; clearMods(); updateDisplay(); return; }
+      state.power = true;
+      doAC();
+      return;
+    }
+
+    const btn = document.querySelector(`[data-act="${act}"]`);
+
+    // Clear B= confirmation on next keystroke (set again if this key finishes STO)
+    if (state.confirmVar) state.confirmVar = null;
+
+    // SHIFT+RCL (=STO) then letter key (ALPHA map, no ALPHA needed): e.g. 8 → SHIFT → RCL → B
+    if (state.stoPending) {
+      if (act === "ac") { doAC(); return; }
+      if (act === "del") {
+        state.stoPending = false;
+        state.stoValue = null;
+        updateDisplay();
+        return;
+      }
+      const letter = letterFromButton(btn);
+      if (letter) {
+        finishSto(letter);
+        return;
+      }
+      // ignore non-letter keys while waiting
+      return;
+    }
+
+    // RCL then letter (no SHIFT): recall variable into expression
+    if (state.rclPending) {
+      if (act === "ac") { doAC(); return; }
+      if (act === "del") {
+        state.rclPending = false;
+        updateDisplay();
+        return;
+      }
+      const letter = letterFromButton(btn);
+      if (letter) {
+        finishRcl(letter);
+        return;
+      }
+      return;
+    }
+
+    if (state.shift && btn && btn.dataset.shift) {
+      const s = btn.dataset.shift;
+      state.shift = false;
+      dispatchShift(s);
+      return;
+    }
+    // ALPHA + key → red letter / e (one-shot). No alpha label → no-op (do not run normal key).
+    if (state.alpha) {
+      state.alpha = false;
+      if (btn && btn.dataset.alpha) {
+        dispatchAlpha(btn.dataset.alpha);
+      } else {
+        updateDisplay(); // clear A indicator only
+      }
+      return;
+    }
+    dispatchNormal(act);
+  }
+
+  function dispatchShift(s) {
+    switch (s) {
+      case "setup":
+        state.menu = "SETUP";
+        state.result = "1:Deg 2:Rad 3:Gra";
+        state.justEvaluated = true;
+        break;
+      case "off":
+      case "off2":
+        state.power = false;
+        break;
+      case "exit":
+        if (state.menu === "FMLA") fmlaExit();
+        else state.menu = null;
+        break;
+      case "cube": insertToken("³"); break;
+      case "cbrt": insertToken("³√"); break;
+      case "tenx": insertToken("10^"); break;
+      case "ex": insertToken("e^"); break;
+      case "asin": insertToken(state.hyp ? "sinh⁻¹" : "sin⁻¹"); state.hyp = false; break;
+      case "acos": insertToken(state.hyp ? "cosh⁻¹" : "cos⁻¹"); state.hyp = false; break;
+      case "atan": insertToken(state.hyp ? "tanh⁻¹" : "tan⁻¹"); state.hyp = false; break;
+      case "fact": insertToken("!"); break;
+      case "percent": insertToken("%"); break;
+      case "mminus": memoryAdd(-1); return;
+      case "npr": insertToken("nPr"); break;
+      case "ncr": insertToken("nCr"); break;
+      case "pi": insertToken("π"); break;
+      case "abs": insertToken("Abs"); break;
+      case "rcl":
+        beginRcl();
+        return;
+      case "sto":
+        beginSto();
+        return;
+      case "mixed":
+        if (state.lastFraction && state.lastFraction.num !== 0) {
+          const f = state.lastFraction;
+          const parts = String(state.result).split(FRAC_SEP);
+          if (parts.length === 3) {
+            state.result = (f.sign < 0 ? "-" : "") + Math.abs(f.improperNum) + FRAC_SEP + f.denOut;
+          } else {
+            state.result = formatFraction(f);
+          }
+          state.showFraction = true;
+        }
+        break;
+      case "root": insertToken("ˣ√"); break;
+      case "eng":
+        if (state.mode === "CMPLX") {
+          insertToken("i");
+          break;
+        }
+        // fall through to engineering notation when not CMPLX
+      case "engback":
+        try {
+          let v = state.ans;
+          if (!state.justEvaluated && state.expr.length) v = evaluate(state.expr);
+          v = requireReal(v);
+          state.result = toEng(v, s === "engback" ? -1 : 1);
+          state.ans = v;
+          state.justEvaluated = true;
+        } catch (e) { setError(e.message || "Math ERROR"); return; }
+        break;
+      case "drg": cycleAngle(); break;
+      case "ins": state.insertMode = !state.insertMode; break;
+      default: break;
+    }
+    updateDisplay();
+  }
+
+  function dispatchAlpha(a) {
+    // ALPHA + key inserts the red legend into the expression (Casio one-shot)
+    if (a === "econst") {
+      insertToken("e");
+      updateDisplay();
+      return;
+    }
+    if (a === "M" || /^[A-FXY]$/.test(a)) {
+      insertToken(a);
+      updateDisplay();
+      return;
+    }
+    updateDisplay();
+  }
+
+  function dispatchNormal(act) {
+    switch (act) {
+      case "0": case "1": case "2": case "3": case "4":
+      case "5": case "6": case "7": case "8": case "9":
+        insertToken(act); break;
+      case "dot": insertToken("."); break;
+      case "add": insertToken("+"); break;
+      case "sub": insertToken("−"); break;
+      case "mul": insertToken("×"); break;
+      case "div": insertToken("÷"); break;
+      case "lparen": insertToken("("); break;
+      case "rparen": insertToken(")"); break;
+      case "pow": insertToken("^"); break;
+      case "sqr": insertToken("²"); break;
+      case "cube": insertToken("³"); break;
+      case "inv": insertToken("⁻¹"); break;
+      case "sqrt": insertToken("√"); break;
+      case "log": insertToken("log"); break;
+      case "ln": insertToken("ln"); break;
+      case "sin": insertToken(state.hyp ? "sinh" : "sin"); state.hyp = false; break;
+      case "cos": insertToken(state.hyp ? "cosh" : "cos"); state.hyp = false; break;
+      case "tan": insertToken(state.hyp ? "tanh" : "tan"); state.hyp = false; break;
+      case "neg": insertToken("(−)"); break;
+      case "frac":
+        // After a result: toggle F↔D; while editing: insert fraction mark
+        if (state.justEvaluated) { toggleFractionDecimal(); return; }
+        insertToken(FRAC_SEP);
+        break;
+      case "exp": insertToken("×10^"); break;
+      case "ans": insertToken("Ans"); break;
+      case "comma": insertToken(","); break;
+      case "eq": doEquals(); return;
+      case "ac": doAC(); return;
+      case "del": doDEL(); return;
+      case "mode":
+        state.menu = "MODE";
+        state.result = "1:COMP 2:CMPLX 3:EQN";
+        state.justEvaluated = true;
+        clearMods();
+        break;
+      case "prog":
+        state.menu = "PROG";
+        state.result = "PRGM coming soon";
+        state.justEvaluated = true;
+        break;
+      case "fmla":
+        fmlaOpen();
+        break;
+      case "rcl":
+        beginRcl();
+        return;
+      case "sto":
+        beginSto();
+        return;
+      case "mplus": memoryAdd(1); return;
+      case "fd":
+        toggleFractionDecimal();
+        return;
+      case "eng":
+        if (state.mode === "CMPLX") {
+          insertToken("i");
+          break;
+        }
+        try {
+          let v = state.ans;
+          if (!state.justEvaluated && state.expr.length) v = evaluate(state.expr);
+          v = requireReal(v);
+          state.result = toEng(v, 1);
+          state.ans = v;
+          state.justEvaluated = true;
+        } catch (e) { setError(e.message || "Math ERROR"); return; }
+        break;
+      case "dms": insertToken("°"); break;
+      case "up": replay(-1); return;
+      case "down": replay(1); return;
+      case "left":
+        if (state.justEvaluated) { state.justEvaluated = false; state.cursor = state.expr.length; }
+        if (state.cursor > 0) state.cursor--;
+        break;
+      case "right":
+        if (state.justEvaluated) { state.justEvaluated = false; state.cursor = state.expr.length; }
+        if (state.cursor < state.expr.length) state.cursor++;
+        break;
+      default: break;
+    }
+    updateDisplay();
+  }
+
+  function updateDisplay() {
+    el.lcd.classList.toggle("off", !state.power);
+    el.lcd.classList.toggle("error", !!state.error);
+    if (state.menu !== "FMLA") el.lcd.classList.remove("fmla-menu");
+    el.indShift.classList.toggle("active", state.shift);
+    el.indAlpha.classList.toggle("active", state.alpha);
+    el.indHyp.classList.toggle("active", state.hyp);
+    el.indM.classList.toggle("active", isComplex(state.memory)
+      ? (state.memory.re !== 0 || state.memory.im !== 0)
+      : state.memory !== 0);
+    el.indAngle.textContent = state.angle === "DEG" ? "D" : state.angle === "RAD" ? "R" : "G";
+    el.indAngle.classList.add("active");
+    el.indMode.textContent = state.mode === "COMP" ? "COMP" : state.mode;
+    el.indMode.classList.add("active");
+    if (el.shiftBtn) el.shiftBtn.classList.toggle("active-mod", state.shift);
+    if (el.alphaBtn) el.alphaBtn.classList.toggle("active-mod", state.alpha);
+
+    if (!state.power) { el.expr.textContent = ""; el.result.textContent = ""; return; }
+
+    if (state.menu === "MODE") { el.expr.textContent = "MODE"; el.result.textContent = "1:COMP 2:CMPLX 3:EQN"; return; }
+    if (state.menu === "SETUP") { el.expr.textContent = "SETUP"; el.result.textContent = "1:Deg 2:Rad 3:Gra"; return; }
+    if (state.menu === "PROG") { el.expr.textContent = "PRGM"; el.result.textContent = "coming soon"; return; }
+    if (state.menu === "FMLA") { fmlaUpdateDisplay(); return; }
+    if (state.stoPending) {
+      const vs = formatValue(state.stoValue);
+      el.expr.textContent = (vs !== null ? vs : "") + "→";
+      el.result.textContent = "";
+      return;
+    }
+    if (state.rclPending) {
+      el.expr.textContent = "RCL";
+      el.result.textContent = "";
+      return;
+    }
+    if (state.confirmVar) {
+      el.expr.textContent = state.confirmVar + "=";
+      el.result.textContent = state.result;
+      return;
+    }
+
+    if (state.error) {
+      el.expr.textContent = exprToString();
+      el.result.textContent = state.error;
+      return;
+    }
+
+    let exprStr = "";
+    for (let i = 0; i < state.expr.length; i++) {
+      if (!state.justEvaluated && i === state.cursor) exprStr += "▌";
+      exprStr += tokenDisplay(state.expr[i]);
+    }
+    if (!state.justEvaluated && state.cursor >= state.expr.length) exprStr += "▌";
+    el.expr.textContent = exprStr || (state.justEvaluated ? exprToString() : "");
+    el.result.textContent = state.result;
+  }
+
+  document.getElementById("keys").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    btn.classList.add("pressed");
+    setTimeout(() => btn.classList.remove("pressed"), 80);
+    handle(btn.dataset.act);
+  });
+
+  const keyMap = {
+    "0": "0", "1": "1", "2": "2", "3": "3", "4": "4",
+    "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
+    ".": "dot", "+": "add", "-": "sub", "*": "mul", "/": "div",
+    Enter: "eq", "=": "eq", Backspace: "del", Escape: "ac",
+    "(": "lparen", ")": "rparen", "^": "pow",
+    ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
+  };
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Shift") { handle("shift"); e.preventDefault(); return; }
+    const act = keyMap[e.key];
+    if (act) { e.preventDefault(); handle(act); }
+  });
+
+  updateDisplay();
+
+  // Console self-check (harmless in browser)
+  function assertEval(tokens, expected, label) {
+    try {
+      const v = evaluate(tokens);
+      const ok = Math.abs(v - expected) < 1e-9;
+      console.log((ok ? "OK" : "FAIL") + " " + label + " => " + v);
+      return ok;
+    } catch (e) {
+      console.log("FAIL " + label + " " + e.message);
+      return false;
+    }
+  }
+  state.angle = "DEG";
+  assertEval(["2", "+", "3"], 5, "2+3");
+  assertEval(["sin", "3", "0"], 0.5, "sin30");
+  assertEval(["√", "1", "6"], 4, "√16");
+  assertEval(["log", "1", "0", "0"], 2, "log100");
+  assertEval(["1", FRAC_SEP, "2"], 0.5, "1」2");
+  assertEval(["3", FRAC_SEP, "4"], 0.75, "3」4");
+  assertEval(["5", "!"], 120, "5!");
+  assertEval(["1", "0", "nCr", "3"], 120, "10nCr3");
+
+  // FMLA self-tests
+  (function fmlaSelfTest() {
+    function check(label, got, exp, tol) {
+      tol = tol || 1e-9;
+      const ok = typeof got === "number" && Math.abs(got - exp) < tol;
+      console.log((ok ? "OK" : "FAIL") + " FMLA " + label + " => " + got + (ok ? "" : " (expected " + exp + ")"));
+      return ok;
+    }
+    const heron = FMLA_LIB[2].compute({ a: 3, b: 4, c: 5 });
+    check("O3 Heron 3-4-5", heron, 6);
+    const pend = FMLA_LIB[14].compute({ L: 1, g: 9.8 });
+    check("O15 pendulum L=1 g=9.8", pend, 2 * Math.PI * Math.sqrt(1 / 9.8), 1e-9);
+    const q = FMLA_LIB[0].compute({ a: 1, b: -5, c: 6 });
+    check("O1 quad X1", q.multi[0].value, 3);
+    check("O1 quad X2", q.multi[1].value, 2);
+    const drop = FMLA_LIB[13].compute({ t: 2, g: 9.8 });
+    check("O14 drop t=2", drop, 0.5 * 9.8 * 4);
+    const spring = FMLA_LIB[15].compute({ m: 1, k: 4 });
+    check("O16 spring m=1 k=4", spring, Math.PI);
+  })();
+
+  // Implicit multiplication
+  (function implicitMulSelfTest() {
+    state.vars.B = 3;
+    state.angle = "DEG";
+    function check(label, tokens, exp) {
+      try {
+        const v = evaluate(tokens);
+        const ok = Math.abs(v - exp) < 1e-9;
+        console.log((ok ? "OK" : "FAIL") + " implMul " + label + " => " + v + (ok ? "" : " expected " + exp));
+      } catch (e) {
+        console.log("FAIL implMul " + label + " " + e.message);
+      }
+    }
+    check("8B", ["8", "B"], 24);
+    check("2(3+4)", ["2", "(", "3", "+", "4", ")"], 14);
+    check("2sin30", ["2", "sin", "3", "0"], 1);
+    check("(1+2)3", ["(", "1", "+", "2", ")", "3"], 9);
+    check("(1+2)B", ["(", "1", "+", "2", ")", "B"], 9);
+    check("2π/π", ["2", "π", "÷", "π"], 2);
+  })();
+
+  // Deep-link: open FMLA menu when URL has #fmla or ?fmla=1 (demo / screenshot)
+  try {
+    if (/[?&#]fmla(=1)?\b/i.test(location.href)) fmlaOpen();
+  } catch (e) {}
+})();
+
+
+</script>
+</body>
+</html>
