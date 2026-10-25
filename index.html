@@ -1301,6 +1301,8 @@ html, body {
     }
     function parseUnary() {
       if (peek() === "(−)") { consume(); return cNeg(parseUnary()); }
+      // Leading minus key (−) acts as unary negation (Casio: enter -14 with [-])
+      if (peek() === "−") { consume(); return cNeg(parseUnary()); }
       if (peek() === "+") { consume(); return parseUnary(); }
       const p = peek();
       if (p && isPrefixFunc(p)) {
