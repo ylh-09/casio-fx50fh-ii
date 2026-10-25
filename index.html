@@ -875,6 +875,15 @@ html, body {
       lastId: null,
       errorKind: null, // "no" when invalid formula number
     },
+    prog: {
+      phase: "no",     // no | input | multi | error
+      index: -1,       // index into PROG_LIB, or -1
+      varIndex: 0,
+      values: {},
+      multi: null,
+      lastId: null,
+      errorKind: null, // "no" when invalid program number
+    },
   };
 
   const el = {
@@ -1913,9 +1922,9 @@ html, body {
       return true;
     }
     if (act === "prog") {
-      // bare Prog while in FMLA exits (EXIT is SHIFT+Prog)
+      // bare Prog while in FMLA: leave FMLA and open Prog No?
       fmlaExit();
-      updateDisplay();
+      progOpen();
       return true;
     }
     if (act === "fmla") {
@@ -2167,6 +2176,406 @@ html, body {
 
 
 
+  /* -------- PROG lightweight program runner (P2 simultaneous) -------- */
+  const PROG_LIB = [
+    {
+      id: 2, zh: "聯立方程", en: "Simultaneous",
+      vars: [
+        { key: "A", prompt: "A?" },
+        { key: "B", prompt: "B?" },
+        { key: "C", prompt: "C?" },
+        { key: "D", prompt: "D?" },
+        { key: "E", prompt: "E?" },
+        { key: "F", prompt: "F?" },
+      ],
+      compute(v) {
+        // Ax + By + C = 0, Dx + Ey + F = 0
+        // → Ax + By = −C, Dx + Ey = −F
+        const A = v.A, B = v.B, C = v.C, D = v.D, E = v.E, F = v.F;
+        const det = A * E - B * D;
+        if (det === 0) throw new Err("Math ERROR");
+        const x = (B * F - C * E) / det;
+        const y = (C * D - A * F) / det;
+        if (!isFinite(x) || !isFinite(y)) throw new Err("Math ERROR");
+        return { multi: [
+          { label: "X=", value: x },
+          { label: "Y=", value: y },
+        ]};
+      },
+    },
+  ];
+
+  function progById(id) {
+    for (let i = 0; i < PROG_LIB.length; i++) {
+      if (PROG_LIB[i].id === id) return { idx: i, prog: PROG_LIB[i] };
+    }
+    return null;
+  }
+
+  function progResetList(keepIndex) {
+    state.prog.phase = "no";
+    if (!keepIndex) state.prog.index = -1;
+    state.prog.varIndex = 0;
+    state.prog.values = {};
+    state.prog.multi = null;
+    state.prog.lastId = null;
+    state.prog.errorKind = null;
+    state.expr = [];
+    state.cursor = 0;
+    state.error = null;
+    state.justEvaluated = false;
+    state.result = "";
+  }
+
+  /** Parse 1–2 digit Prog No → program id number or throw */
+  function progParseNo() {
+    if (!state.expr.length) throw new Err("Math ERROR");
+    const raw = state.expr.join("");
+    if (!/^\d{1,2}$/.test(raw)) throw new Err("Math ERROR");
+    const n = parseInt(raw, 10);
+    if (!isFinite(n) || n < 1 || n > 99) throw new Err("Math ERROR");
+    return n;
+  }
+
+  function progAcceptNo() {
+    try {
+      const n = progParseNo();
+      const found = progById(n);
+      if (!found) throw new Err("Math ERROR");
+      progStartProgram(found.idx);
+      updateDisplay();
+    } catch (e) {
+      state.menu = "PROG";
+      state.prog.phase = "error";
+      state.prog.errorKind = "no";
+      state.expr = [];
+      state.cursor = 0;
+      setError(e.message || "Math ERROR");
+    }
+  }
+
+  function progExit() {
+    state.menu = null;
+    progResetList(false);
+    state.result = formatNumber(state.ans);
+    state.justEvaluated = true;
+    state.mode = "COMP";
+  }
+
+  function progOpen() {
+    // Leave FMLA cleanly if still open
+    if (state.menu === "FMLA") {
+      state.menu = null;
+      fmlaResetList(false);
+    }
+    state.menu = "PROG";
+    state.stoPending = false;
+    state.rclPending = false;
+    state.stoValue = null;
+    state.confirmVar = null;
+    progResetList(false);
+    clearMods();
+    updateDisplay();
+  }
+
+  function progCurrent() {
+    if (state.prog.index < 0 || state.prog.index >= PROG_LIB.length) return null;
+    return PROG_LIB[state.prog.index];
+  }
+
+  function progStartProgram(idx) {
+    state.prog.index = idx;
+    state.prog.phase = "input";
+    state.prog.varIndex = 0;
+    state.prog.values = {};
+    state.prog.multi = null;
+    state.prog.lastId = PROG_LIB[idx].id;
+    state.expr = [];
+    state.cursor = 0;
+    state.error = null;
+    state.justEvaluated = false;
+    state.result = "";
+  }
+
+  function progAcceptVar() {
+    const p = progCurrent();
+    if (!p) {
+      state.prog.phase = "error";
+      state.prog.errorKind = "no";
+      setError("Math ERROR");
+      return;
+    }
+    const spec = p.vars[state.prog.varIndex];
+    let val;
+    try {
+      val = fmlaParseInputValue(spec);
+    } catch (e) {
+      state.menu = "PROG";
+      state.prog.phase = "error";
+      state.prog.errorKind = null;
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    state.prog.values[spec.key] = val;
+    state.expr = [];
+    state.cursor = 0;
+    state.prog.varIndex++;
+    if (state.prog.varIndex >= p.vars.length) {
+      progRunCompute();
+    } else {
+      state.result = "";
+      state.justEvaluated = false;
+      updateDisplay();
+    }
+  }
+
+  function progRunCompute() {
+    const p = progCurrent();
+    try {
+      const out = p.compute(state.prog.values);
+      if (out && typeof out === "object" && out.multi) {
+        state.prog.multi = { items: out.multi, i: 0 };
+        state.prog.phase = "multi";
+        const item = out.multi[0];
+        state.ans = typeof item.value === "number" ? item.value : state.ans;
+        state.result = item.text || formatNumber(item.value);
+        state.justEvaluated = true;
+        state.error = null;
+        state.history.push({ expr: ["PROG", "P" + p.id], value: item.value });
+        if (state.history.length > 30) state.history.shift();
+        state.histIndex = state.history.length;
+      } else {
+        throw new Err("Math ERROR");
+      }
+    } catch (e) {
+      state.menu = "PROG";
+      state.prog.phase = "error";
+      state.prog.errorKind = null;
+      setError(e.message || "Math ERROR");
+      return;
+    }
+    updateDisplay();
+  }
+
+  function progHandle(act) {
+    if (act === "ac" || act === "on") {
+      if (act === "on") { state.power = true; }
+      progExit();
+      doAC();
+      return true;
+    }
+    if (act === "prog") {
+      // bare Prog while in PROG returns to Prog No?
+      progResetList(false);
+      updateDisplay();
+      return true;
+    }
+    if (act === "fmla") {
+      progExit();
+      fmlaOpen();
+      return true;
+    }
+    if (act === "shift") {
+      state.shift = !state.shift;
+      state.alpha = false;
+      updateDisplay();
+      return true;
+    }
+    if (state.shift) {
+      const btn = document.querySelector(`[data-act="${act}"]`);
+      if (btn && btn.dataset.shift === "exit") {
+        state.shift = false;
+        progExit();
+        updateDisplay();
+        return true;
+      }
+      if (btn && btn.dataset.shift === "off") {
+        state.shift = false;
+        state.power = false;
+        updateDisplay();
+        return true;
+      }
+      state.shift = false;
+    }
+
+    const phase = state.prog.phase;
+
+    if (phase === "error") {
+      if (act === "del" || act === "eq") {
+        state.error = null;
+        progResetList(false);
+        updateDisplay();
+      }
+      return true;
+    }
+
+    if (phase === "no") {
+      if (act === "eq") {
+        if (state.expr.length) progAcceptNo();
+        return true;
+      }
+      if (act === "del") {
+        if (state.expr.length) {
+          if (state.cursor > 0) {
+            state.expr.splice(state.cursor - 1, 1);
+            state.cursor--;
+          }
+          updateDisplay();
+          return true;
+        }
+        progExit();
+        updateDisplay();
+        return true;
+      }
+      if (act === "left" || act === "right") {
+        if (act === "left" && state.cursor > 0) state.cursor--;
+        if (act === "right" && state.cursor < state.expr.length) state.cursor++;
+        updateDisplay();
+        return true;
+      }
+      const noMap = {
+        "0": "0", "1": "1", "2": "2", "3": "3", "4": "4",
+        "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
+      };
+      if (noMap[act]) {
+        if (state.expr.length >= 2) return true;
+        insertToken(noMap[act]);
+        // Auto-run on 2 digits (02) or on single digit 1–9 (Casio Prog P#)
+        if (state.expr.length >= 2 || (state.expr.length === 1 && state.expr[0] !== "0")) {
+          progAcceptNo();
+        } else {
+          updateDisplay(); // leading 0 waiting for 2nd digit
+        }
+        return true;
+      }
+      return true;
+    }
+
+    if (phase === "input") {
+      if (act === "eq") {
+        progAcceptVar();
+        return true;
+      }
+      if (act === "del") {
+        if (state.error) { state.error = null; updateDisplay(); return true; }
+        if (state.expr.length) {
+          if (state.cursor > 0) {
+            state.expr.splice(state.cursor - 1, 1);
+            state.cursor--;
+          }
+          updateDisplay();
+          return true;
+        }
+        if (state.prog.varIndex > 0) {
+          state.prog.varIndex--;
+          const prevKey = progCurrent().vars[state.prog.varIndex].key;
+          delete state.prog.values[prevKey];
+          updateDisplay();
+        } else {
+          progResetList(false);
+          updateDisplay();
+        }
+        return true;
+      }
+      if (act === "up" || act === "down" || act === "left" || act === "right") {
+        if (act === "left" && state.cursor > 0) state.cursor--;
+        if (act === "right" && state.cursor < state.expr.length) state.cursor++;
+        updateDisplay();
+        return true;
+      }
+      const digitMap = {
+        "0":"0","1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9",
+        "dot":".", "sub":"−", "add":"+", "mul":"×", "div":"÷",
+        "lparen":"(", "rparen":")", "pow":"^", "neg":"(−)", "exp":"×10^",
+        "ans":"Ans", "sqrt":"√", "pi":"π",
+      };
+      if (digitMap[act]) {
+        insertToken(digitMap[act]);
+        updateDisplay();
+        return true;
+      }
+      return true;
+    }
+
+    if (phase === "multi") {
+      if (act === "eq") {
+        const m = state.prog.multi;
+        if (m.i + 1 < m.items.length) {
+          m.i++;
+          const item = m.items[m.i];
+          state.ans = typeof item.value === "number" ? item.value : state.ans;
+          state.result = item.text || formatNumber(item.value);
+          updateDisplay();
+        } else {
+          // after last result: re-run same program inputs
+          progStartProgram(state.prog.index);
+          updateDisplay();
+        }
+        return true;
+      }
+      if (act === "del") {
+        progResetList(false);
+        updateDisplay();
+        return true;
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  function progUpdateDisplay() {
+    const phase = state.prog.phase;
+    const p = progCurrent();
+    const pLabel = p ? ("P" + p.id) : "PROG";
+    el.indMode.textContent = (phase === "input" || phase === "multi") && p ? pLabel : "PROG";
+    el.indMode.classList.add("active");
+    el.lcd.classList.toggle("fmla-menu", phase === "no");
+
+    if (phase === "no") {
+      el.expr.textContent = "Prog";
+      let exprStr = "";
+      for (let i = 0; i < state.expr.length; i++) {
+        if (i === state.cursor) exprStr += "▌";
+        exprStr += state.expr[i];
+      }
+      if (state.cursor >= state.expr.length) exprStr += "▌";
+      el.result.textContent = state.expr.length ? exprStr : "No?▌";
+      return true;
+    }
+    if (phase === "error") {
+      if (state.prog.errorKind === "no") {
+        el.expr.textContent = "Prog No?";
+      } else if (p) {
+        el.expr.textContent = pLabel + " " + p.zh;
+      } else {
+        el.expr.textContent = "Prog";
+      }
+      el.result.textContent = state.error || "Math ERROR";
+      return true;
+    }
+    if (phase === "input") {
+      const spec = p.vars[state.prog.varIndex];
+      el.expr.textContent = pLabel + " " + p.zh + " " + spec.prompt;
+      let exprStr = "";
+      for (let i = 0; i < state.expr.length; i++) {
+        if (i === state.cursor) exprStr += "▌";
+        exprStr += state.expr[i];
+      }
+      if (state.cursor >= state.expr.length) exprStr += "▌";
+      el.result.textContent = exprStr;
+      return true;
+    }
+    if (phase === "multi") {
+      const item = state.prog.multi.items[state.prog.multi.i];
+      el.expr.textContent = pLabel + " " + item.label;
+      el.result.textContent = item.text || formatNumber(item.value);
+      return true;
+    }
+    return false;
+  }
+
+
   function letterFromButton(btn) {
     if (!btn || !btn.dataset.alpha) return null;
     const a = btn.dataset.alpha;
@@ -2278,6 +2687,7 @@ html, body {
 
   function doEquals() {
     if (state.menu === "FMLA") { fmlaHandle("eq"); return; }
+    if (state.menu === "PROG") { progHandle("eq"); return; }
     if (state.menu) { state.menu = null; updateDisplay(); return; }
     try {
       if (!state.expr.length) {
@@ -2319,6 +2729,7 @@ html, body {
     state.hyp = false;
     state.showFraction = false;
     if (state.fmla) fmlaResetList(false);
+    if (state.prog) progResetList(false);
     state.stoPending = false;
     state.rclPending = false;
     state.stoValue = null;
@@ -2329,6 +2740,7 @@ html, body {
 
   function doDEL() {
     if (state.menu === "FMLA") { fmlaHandle("del"); return; }
+    if (state.menu === "PROG") { progHandle("del"); return; }
     if (state.menu) { state.menu = null; updateDisplay(); return; }
     if (state.error) { state.error = null; updateDisplay(); return; }
     if (state.justEvaluated) {
@@ -2439,8 +2851,7 @@ html, body {
       return;
     }
     if (state.menu === "PROG") {
-      if (act === "ac" || act === "del" || act === "eq" || act === "on") state.menu = null;
-      updateDisplay();
+      progHandle(act);
       return;
     }
     if (act === "shift") { state.shift = !state.shift; state.alpha = false; updateDisplay(); return; }
@@ -2533,6 +2944,7 @@ html, body {
         break;
       case "exit":
         if (state.menu === "FMLA") fmlaExit();
+        else if (state.menu === "PROG") progExit();
         else state.menu = null;
         break;
       case "cube": insertToken("³"); break;
@@ -2647,9 +3059,7 @@ html, body {
         clearMods();
         break;
       case "prog":
-        state.menu = "PROG";
-        state.result = "PRGM coming soon";
-        state.justEvaluated = true;
+        progOpen();
         break;
       case "fmla":
         fmlaOpen();
@@ -2697,7 +3107,7 @@ html, body {
   function updateDisplay() {
     el.lcd.classList.toggle("off", !state.power);
     el.lcd.classList.toggle("error", !!state.error);
-    if (state.menu !== "FMLA") el.lcd.classList.remove("fmla-menu");
+    if (state.menu !== "FMLA" && state.menu !== "PROG") el.lcd.classList.remove("fmla-menu");
     el.indShift.classList.toggle("active", state.shift);
     el.indAlpha.classList.toggle("active", state.alpha);
     el.indHyp.classList.toggle("active", state.hyp);
@@ -2715,7 +3125,7 @@ html, body {
 
     if (state.menu === "MODE") { el.expr.textContent = "MODE"; el.result.textContent = "1:COMP 2:CMPLX 3:EQN"; return; }
     if (state.menu === "SETUP") { el.expr.textContent = "SETUP"; el.result.textContent = "1:Deg 2:Rad 3:Gra"; return; }
-    if (state.menu === "PROG") { el.expr.textContent = "PRGM"; el.result.textContent = "coming soon"; return; }
+    if (state.menu === "PROG") { progUpdateDisplay(); return; }
     if (state.menu === "FMLA") { fmlaUpdateDisplay(); return; }
     if (state.stoPending) {
       const vs = formatValue(state.stoValue);
@@ -2795,6 +3205,23 @@ html, body {
   assertEval(["3", FRAC_SEP, "4"], 0.75, "3」4");
   assertEval(["5", "!"], 120, "5!");
   assertEval(["1", "0", "nCr", "3"], 120, "10nCr3");
+
+  // PROG self-tests (P2 simultaneous)
+  (function progSelfTest() {
+    function check(label, got, exp, tol) {
+      tol = tol || 1e-9;
+      const ok = typeof got === "number" && Math.abs(got - exp) < tol;
+      console.log((ok ? "OK" : "FAIL") + " PROG " + label + " => " + got + (ok ? "" : " (expected " + exp + ")"));
+      return ok;
+    }
+    const p2 = progById(2).prog;
+    const sol = p2.compute({ A: 1, B: 1, C: -5, D: 1, E: -1, F: -1 });
+    check("P2 X x+y=5,x-y=1", sol.multi[0].value, 3);
+    check("P2 Y x+y=5,x-y=1", sol.multi[1].value, 2);
+    let threw = false;
+    try { p2.compute({ A: 1, B: 1, C: 0, D: 2, E: 2, F: 0 }); } catch (e) { threw = e.message === "Math ERROR"; }
+    console.log((threw ? "OK" : "FAIL") + " PROG P2 singular → Math ERROR");
+  })();
 
   // FMLA self-tests
   (function fmlaSelfTest() {
