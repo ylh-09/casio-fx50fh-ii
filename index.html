@@ -860,6 +860,7 @@ html, body {
     error: null,
     history: [],
     histIndex: -1,
+    histBrowsing: false,
     insertMode: true,
     showFraction: false,
     lastFraction: null,
@@ -1158,6 +1159,7 @@ html, body {
     state.justEvaluated = false;
     state.error = null;
     state.showFraction = false;
+    state.histBrowsing = false;
 
     if (!state.insertMode && state.cursor < state.expr.length) {
       state.expr[state.cursor] = tok;
@@ -2726,6 +2728,7 @@ html, body {
         }
       }
       state.justEvaluated = true;
+      state.histBrowsing = false;
       state.error = null;
       state.cursor = state.expr.length;
     } catch (e) {
@@ -2741,6 +2744,7 @@ html, body {
     state.result = "0.";
     state.error = null;
     state.justEvaluated = false;
+    state.histBrowsing = false;
     state.menu = null;
     state.hyp = false;
     state.showFraction = false;
@@ -2761,10 +2765,12 @@ html, body {
     if (state.error) { state.error = null; updateDisplay(); return; }
     if (state.justEvaluated) {
       state.justEvaluated = false;
+      state.histBrowsing = false;
       state.result = "";
       updateDisplay();
       return;
     }
+    state.histBrowsing = false;
     if (state.cursor > 0) {
       state.expr.splice(state.cursor - 1, 1);
       state.cursor--;
@@ -2802,6 +2808,7 @@ html, body {
       state.cursor = 0;
       state.result = formatValue(state.ans);
       state.justEvaluated = true;
+      state.histBrowsing = false;
       state.error = null;
       updateDisplay();
       return;
@@ -2812,7 +2819,9 @@ html, body {
     state.result = formatValue(h.value);
     state.ans = h.value;
     // Editable immediately (cursor visible); result kept until re-EXE
+    // Stay in history-browse so further ▲/▼ walk older/newer entries
     state.justEvaluated = false;
+    state.histBrowsing = true;
     state.error = null;
     state.showFraction = false;
     clearMods();
@@ -3109,14 +3118,26 @@ html, body {
         } catch (e) { setError(e.message || "Math ERROR"); return; }
         break;
       case "dms": insertToken("°"); break;
-      case "up": replay(-1); return;
-      case "down": replay(1); return;
+      case "up":
+        // After EXE or while browsing history: ▲ previous entry.
+        // While editing a formula: ▲ jumps to the start (Casio REPLAY).
+        if (state.justEvaluated || state.histBrowsing) { replay(-1); return; }
+        state.cursor = 0;
+        break;
+      case "down":
+        // After EXE or while browsing history: ▼ next entry.
+        // While editing a formula: ▼ jumps to the end (Casio REPLAY).
+        if (state.justEvaluated || state.histBrowsing) { replay(1); return; }
+        state.cursor = state.expr.length;
+        break;
       case "left":
         if (state.justEvaluated) { state.justEvaluated = false; state.cursor = state.expr.length; }
+        state.histBrowsing = false;
         if (state.cursor > 0) state.cursor--;
         break;
       case "right":
         if (state.justEvaluated) { state.justEvaluated = false; state.cursor = state.expr.length; }
+        state.histBrowsing = false;
         if (state.cursor < state.expr.length) state.cursor++;
         break;
       default: break;
