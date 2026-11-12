@@ -1031,42 +1031,54 @@ html, body {
     return a || 1;
   }
 
-  function toFraction(n, maxDen) {
-    maxDen = maxDen || 10000;
-    if (!isFinite(n)) return null;
-    const sign = n < 0 ? -1 : 1;
-    n = Math.abs(n);
-    const whole = Math.floor(n + 1e-12);
-    let frac = n - whole;
-    if (frac < 1e-12) {
-      return { sign, whole, num: 0, den: 1, improperNum: sign * whole, denOut: 1 };
-    }
-    let bestNum = 1, bestDen = 1, bestErr = Math.abs(frac - 1);
-    for (let den = 1; den <= maxDen; den++) {
-      const num = Math.round(frac * den);
-      const err = Math.abs(frac - num / den);
-      if (err < bestErr - 1e-15 || (Math.abs(err - bestErr) < 1e-15 && den < bestDen)) {
-        bestErr = err; bestNum = num; bestDen = den;
-        if (err < 1e-12) break;
-      }
-    }
-    let g = gcd(bestNum, bestDen);
-    bestNum /= g; bestDen /= g;
-    if (bestNum === bestDen) {
-      return { sign, whole: whole + 1, num: 0, den: 1, improperNum: sign * (whole + 1), denOut: 1 };
-    }
-    if (bestNum > bestDen) {
-      const add = Math.floor(bestNum / bestDen);
-      bestNum %= bestDen;
-      return {
-        sign, whole: whole + add, num: bestNum, den: bestDen,
-        improperNum: sign * ((whole + add) * bestDen + bestNum), denOut: bestDen,
-      };
-    }
+  function fractionExact(n, num, den) {
+    if (!den) return false;
+    const approx = num / den;
+    // Only accept an exact float match (or a couple of ULPs) — never a nearby Farey approx.
+    if (approx === n) return true;
+    const scale = Math.max(Math.abs(n), Math.abs(approx), Number.MIN_VALUE);
+    return Math.abs(approx - n) <= Number.EPSILON * scale * 4;
+  }
+
+  function makeFraction(sign, improper, den) {
+    if (den < 0) { improper = -improper; den = -den; }
+    const g = gcd(Math.abs(improper), den);
+    improper /= g; den /= g;
+    const whole = Math.floor(Math.abs(improper) / den);
+    const num = Math.abs(improper) - whole * den;
     return {
-      sign, whole, num: bestNum, den: bestDen,
-      improperNum: sign * (whole * bestDen + bestNum), denOut: bestDen,
+      sign, whole, num, den,
+      improperNum: sign * Math.abs(improper), denOut: den,
     };
+  }
+
+  /** Exact rational only. Approximations (e.g. 85/9944 for 117/13688) are rejected. */
+  function toFraction(n, maxDen) {
+    maxDen = maxDen || 10000000;
+    if (typeof n !== "number" || !isFinite(n)) return null;
+    const sign = n < 0 ? -1 : 1;
+    const x = Math.abs(n);
+    if (x === 0) return makeFraction(1, 0, 1);
+    // Integer (within a tiny absolute slop)
+    if (fractionExact(x, Math.round(x), 1)) {
+      return makeFraction(sign, Math.round(x), 1);
+    }
+    // Continued fraction: recover the exact rational when it fits in a float.
+    let h0 = 0, k0 = 1, h1 = 1, k1 = 0;
+    let y = x;
+    for (let i = 0; i < 64; i++) {
+      if (!isFinite(y)) break;
+      const a = Math.floor(y + 1e-15);
+      const h = a * h1 + h0;
+      const k = a * k1 + k0;
+      if (k > maxDen || !isFinite(h) || !isFinite(k)) break;
+      if (k > 0 && fractionExact(x, h, k)) return makeFraction(sign, h, k);
+      h0 = h1; k0 = k1; h1 = h; k1 = k;
+      const frac = y - a;
+      if (frac <= 1e-18) break;
+      y = 1 / frac;
+    }
+    return null;
   }
 
   function formatFraction(f) {
@@ -2655,9 +2667,8 @@ html, body {
 
   /* -------- Actions -------- */
   function fractionFits(v, f) {
-    if (!f || f.num === 0) return false;
-    const approx = f.improperNum / f.denOut;
-    return Math.abs(approx - v) <= 1e-10 * Math.max(1, Math.abs(v));
+    if (!f || f.num === 0 || typeof v !== "number") return false;
+    return fractionExact(v, f.improperNum, f.denOut);
   }
 
   /** Toggle displayed Ans between fraction and decimal (Casio aᵇ/ᶜ after EXE). */
@@ -2708,7 +2719,11 @@ html, body {
       } else {
         const frac = toFraction(val);
         state.lastFraction = frac;
-        state.result = state.showFraction && frac && frac.num !== 0 ? formatFraction(frac) : formatNumber(val);
+        if (state.showFraction && fractionFits(val, frac)) {
+          state.result = formatFraction(frac);
+        } else {
+          state.result = formatNumber(val);
+        }
       }
       state.justEvaluated = true;
       state.error = null;
@@ -2969,15 +2984,19 @@ html, body {
         beginSto();
         return;
       case "mixed":
-        if (state.lastFraction && state.lastFraction.num !== 0) {
-          const f = state.lastFraction;
-          const parts = String(state.result).split(FRAC_SEP);
-          if (parts.length === 3) {
-            state.result = (f.sign < 0 ? "-" : "") + Math.abs(f.improperNum) + FRAC_SEP + f.denOut;
-          } else {
-            state.result = formatFraction(f);
+        {
+          const v = typeof state.ans === "number" ? state.ans : null;
+          const f = (v != null && isFinite(v)) ? (toFraction(v) || state.lastFraction) : state.lastFraction;
+          state.lastFraction = f;
+          if (f && f.num !== 0 && (v == null || fractionFits(v, f))) {
+            const parts = String(state.result).split(FRAC_SEP);
+            if (parts.length === 3) {
+              state.result = (f.sign < 0 ? "-" : "") + Math.abs(f.improperNum) + FRAC_SEP + f.denOut;
+            } else {
+              state.result = formatFraction(f);
+            }
+            state.showFraction = true;
           }
-          state.showFraction = true;
         }
         break;
       case "root": insertToken("ˣ√"); break;
